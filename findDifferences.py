@@ -175,7 +175,7 @@ def parseClustal(referenceId, fileName):
 				line_to_list = line.split()
 				key = line_to_list[0]
 				align = line_to_list[1]
-				if len(line_to_list) == 3:
+				if len(line_to_list) == 3: # Note: only some aligners show base count
 					num_of_bases = line_to_list[2]
 				if key not in alignments.keys(): # Create dict entry
 					alignments[key] = ''
