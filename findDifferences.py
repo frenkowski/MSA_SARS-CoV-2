@@ -190,12 +190,16 @@ def main():
 	path_alignments = "./Alignments/"
 	path_output = "./Outputs/"
 	for file in os.listdir(path_alignments):
-	    if file.endswith(".clw"):
+	    if file.endswith(".clw"): # for each .clw file
+	    	# Obtain filename, will be used for both input and output
 	    	fileName = os.path.splitext(file)[0]
-	    	print(fileName)
+	    	# Parse reference and alignments from file
 	        reference, alignments = parseClustal("NC_045512", path_alignments+fileName)
+	        # Find for each alignment all single differences
 	        diff = findDifferences(reference,alignments)
+	        # Compact consecutive difference
 	        compact = compactDifferences(diff)
+	        # Write differences to file
 	        writeToFile(path_output+fileName,reference,compact)
 
 if __name__ == "__main__":
