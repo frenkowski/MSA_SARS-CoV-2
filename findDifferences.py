@@ -1,5 +1,6 @@
 from collections import OrderedDict # Remembers the order entries were added
 import re
+import os
 
 ## Returns for each alignment all the positions where it differs from the reference
 def findDifferences(reference, alignments):
@@ -155,7 +156,8 @@ def writeToFile(fileName, reference, compactDifferences):
 def parseClustal(referenceId, fileName):
 	alignments = dict()
 	reference = dict()
-	with open(fileName, "r") as f:
+	path = "{}.clw".format(fileName)
+	with open(path, "r") as f:
 
 		# Remove header
 		lines = f.readlines()[1:]
@@ -170,7 +172,11 @@ def parseClustal(referenceId, fileName):
 			line = re.sub(' +', ' ', line)
 			
 			if line != '':
-				key, align, num_of_bases = line.split()
+				line_to_list = line.split()
+				key = line_to_list[0]
+				align = line_to_list[1]
+				if len(line_to_list) == 3:
+					num_of_bases = line_to_list[2]
 				if key not in alignments.keys(): # Create dict entry
 					alignments[key] = ''
 				alignments[key] = alignments[key] + align
@@ -180,15 +186,30 @@ def parseClustal(referenceId, fileName):
 		
 		return reference, alignments		
 
-reference, alignments = parseClustal("NC_045512", "ClustalOmega.clustal_num")	
-#print(reference)
-print("\n")
-#print(alignments)	 
+def main():
+	path_alignments = "./Alignments/"
+	path_output = "./Outputs/"
+	for file in os.listdir(path_alignments):
+	    if file.endswith(".clw"):
+	    	fileName = os.path.splitext(file)[0]
+	    	print(fileName)
+	        reference, alignments = parseClustal("NC_045512", path_alignments+fileName)
+	        diff = findDifferences(reference,alignments)
+	        compact = compactDifferences(diff)
+	        writeToFile(path_output+fileName,reference,compact)
 
-diff = findDifferences(reference,alignments)
-compact = compactDifferences(diff)
-printDifferences(reference, compact)
-writeToFile("difficile",reference,compact)
+if __name__ == "__main__":
+    main()
+
+# reference, alignments = parseClustal("NC_045512", "ClustalOmega.clustal_num")	
+# #print(reference)
+# print("\n")
+# #print(alignments)	 
+
+# diff = findDifferences(reference,alignments)
+# compact = compactDifferences(diff)
+# printDifferences(reference, compact)
+# writeToFile("difficile",reference,compact)
 
 
 # ref = dict()
