@@ -136,8 +136,35 @@ def printDifferences(reference, compactDifferences):
 			temp = value.format(diff['start']+1,diff['length'],diff['type'],diff['ref'],diff['seq'])
 			print(temp)
 
+def findStats(reference, alignments):
+	# Initialize dict
+	stats = dict()
+	for align_id in alignments.keys():
+		stats[align_id] = dict()
+		stats[align_id]['matches'] = 0
+		stats[align_id]['mismatches'] = 0
+		stats[align_id]['na'] = 0
+
+	# Extract reference from dict
+	ref_id = reference.keys()[0]
+	ref = reference[ref_id]
+
+	for i in range(0, len(ref)):
+		for align_id in alignments.keys():
+			curr_base = alignments[align_id][i]
+			if curr_base == 'N':
+				stats[align_id]['na'] = stats[align_id]['na'] + 1
+			elif curr_base == ref[i]:
+				stats[align_id]['matches'] = stats[align_id]['matches'] + 1
+			else: # curr_base != ref[i]
+				stats[align_id]['mismatches'] = stats[align_id]['mismatches'] + 1
+
+	return stats
+
+
+
 ## Write the differences to file
-def writeToFile(fileName, reference, compactDifferences):
+def writeToFile(fileName, reference, compactDifferences, stats):
 	ref_id = reference.keys()[0]
 	ref = "##Ref={}, len={}\n".format(ref_id, len(reference[ref_id]))
 	fields = "START\tLENGTH\tTYPE\tREF\tSEQ\t\n"
@@ -146,7 +173,10 @@ def writeToFile(fileName, reference, compactDifferences):
 	with open(path, "w") as f: 
 		f.write(ref)
 		for align_id in compactDifferences.keys():
-				seq = "##Seq={}\n".format(align_id)
+				seq = "##Seq={},Matches={},Mismatches={},NA={}\n".format(align_id,
+																		stats[align_id]['matches'],
+																		stats[align_id]['mismatches'],
+																		stats[align_id]['na'])
 				f.write(seq)
 				f.write(fields)
 				for diff in compactDifferences[align_id]:
@@ -199,8 +229,10 @@ def main():
 	        diff = findDifferences(reference,alignments)
 	        # Compact consecutive difference
 	        compact = compactDifferences(diff)
+	        # Find alignments stats
+	        stats = findStats(reference, alignments)
 	        # Write differences to file
-	        writeToFile(path_output+fileName,reference,compact)
+	        writeToFile(path_output+fileName,reference,compact,stats)
 
 if __name__ == "__main__":
     main()
