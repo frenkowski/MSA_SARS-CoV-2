@@ -1,4 +1,4 @@
-##Ref=NC_045512, len=29903
+##Ref=NC_045512,len=29903,NA=0
 ##Seq=MT328035,Matches=29895,Mismatches=8,NA=0
 START	LENGTH	TYPE	REF	SEQ	
 241	1	rep	C	T	

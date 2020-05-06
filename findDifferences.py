@@ -148,8 +148,16 @@ def findStats(reference, alignments):
 	# Extract reference from dict
 	ref_id = reference.keys()[0]
 	ref = reference[ref_id]
+	
+	# Add entry in stats for reference
+	stats[ref_id] = dict()
+	stats[ref_id]['na'] = 0 # Count number of Ns
 
 	for i in range(0, len(ref)):
+		# Check if ref is Not Available
+		if ref[i] == 'N':
+			stats[ref_id]['na'] = stats[ref_id]['na'] + 1
+		# Check each alignment
 		for align_id in alignments.keys():
 			curr_base = alignments[align_id][i]
 			if curr_base == 'N':
@@ -166,7 +174,7 @@ def findStats(reference, alignments):
 ## Write the differences to file
 def writeToFile(fileName, reference, compactDifferences, stats):
 	ref_id = reference.keys()[0]
-	ref = "##Ref={}, len={}\n".format(ref_id, len(reference[ref_id]))
+	ref = "##Ref={},len={},NA={}\n".format(ref_id, len(reference[ref_id]), stats[ref_id]['na'])
 	fields = "START\tLENGTH\tTYPE\tREF\tSEQ\t\n"
 	value ="{}\t{}\t{}\t{}\t{}\t\n"
 	path = "{}.mad".format(fileName) # MAD = Multiple Alignment Difference
