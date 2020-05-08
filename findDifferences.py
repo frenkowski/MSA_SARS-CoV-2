@@ -70,7 +70,7 @@ def findDifferences(reference, alignments):
     return differences
 
 
-def compactDifferences(differences):
+def compactDifferences1(differences):
     """
         Compact for each alignment all the consecutive differences of the same type
 
@@ -141,6 +141,74 @@ def compactDifferences(differences):
                 curr_diff = {}
 
     return new_Differences
+
+def compactDifferences2(compactDifferences):
+    index = dict()
+    values = dict()
+    for seq_id in compactDifferences.keys():
+        # Check if there is at least one difference
+        if compactDifferences[seq_id]:
+            index[seq_id] = 0
+            values[seq_id] = ''
+
+    result = []
+    empty = False
+    while not empty:
+        # Extract values for comparison in this iteration
+        for seq_id in values.keys():
+            curr_index = index[seq_id]
+            values[seq_id] = compactDifferences[seq_id][curr_index]
+        
+        # Find the difference with the lowest starting position
+        lowest_starting = dict()
+        for difference in values.values():
+            if not lowest_starting:
+                lowest_starting = difference
+            elif difference['start'] < lowest_starting['start']:
+                lowest_starting = difference
+            # else do nothing
+        
+        # Find if difference is contained in multiple alignments
+        # NOTE: differences are sorted by starting pos
+        where_field = list()
+        for seq_id in values.keys():
+            if lowest_starting == values[seq_id]:
+                # store the seq_id
+                where_field.append(seq_id)
+                # increase the index
+                index[seq_id] = index[seq_id]+1
+
+        lowest_starting['where'] = where_field
+        where_field = []
+
+        result.append(lowest_starting)
+        lowest_starting = {}
+
+        # Check if all lists have been empty'd
+        empty=True
+        for seq_id in list(index.keys()): 
+            # List necessary due to RuntimeError: dictionary changed size during iteration
+            number_of_differences = len(compactDifferences[seq_id])
+            if index[seq_id] < number_of_differences:
+                empty=False
+            else:  # all differences have been analyzed, remove from dicts
+                index.pop(seq_id)
+                values.pop(seq_id)
+
+    return result
+
+    def optmizeDifferences(differences):
+        result = list()
+        
+        differences = []
+        if differences:
+            for diff1, diff2 in zip(differences, differences[1:]):
+                if diff1['start'] == diff2['start']:
+                    curr_differences.append(diff1)
+                    pass
+        
+        return result
+
 
 def findStats(reference, alignments):
     """
@@ -219,6 +287,41 @@ def writeToFile(fileName, reference, compactDifferences, stats):
                 temp = value.format(
                     diff['start']+1, diff['length'], diff['type'], diff['ref'], diff['seq'])
                 f.write(temp)
+
+def writeToFile2(fileName, reference, differences, stats):
+    """
+        Print all differences to terminal
+        :param fileName:
+            The name of the file that will be used to store the differences (WITHOUT the extension)
+        :param reference:
+            A dict of the form {ref_id : reference}
+        :param differences:
+            A list of differences with the 'where' field from compactDifferences2()
+        :param stats:
+            The stats obtained from findStats()
+    """
+    ref_id = list(reference.keys())[0]
+    ref = "##Ref={},len={},NA={}\t\n".format(
+        ref_id, len(reference[ref_id]), stats[ref_id]['na'])
+    fields = "START\tLENGTH\tTYPE\tREF\tSEQ\tWHERE\t\n"
+    value = "{}\t{}\t{}\t{}\t{}\t{}\t\n"
+    path = "{}.mad2".format(fileName)  # MAD2 = Multiple Alignment Difference 2
+    with open(path, "w") as f:
+        f.write(ref)
+        stats.pop(ref_id) # remove stats relative to ref
+        for align_id in stats.keys():
+            seq = "##Seq={},Matches={},Mismatches={},NA={}\n".format(align_id,
+                                                                    stats[align_id]['matches'],
+                                                                    stats[align_id]['mismatches'],
+                                                                    stats[align_id]['na'])
+            f.write(seq)
+        
+        f.write(fields)
+        for diff in differences:
+            temp = value.format(
+                diff['start']+1, diff['length'], diff['type'], diff['ref'], diff['seq'],diff['where'])
+            f.write(temp)
+
 
 def findCommonDifferences(differencesByAligner):
     """
@@ -330,13 +433,21 @@ def main():
             # Find for each alignment all single differences
             diff = findDifferences(reference, alignments)
             # Compact consecutive difference
-            compact = compactDifferences(diff)
+            compact = compactDifferences1(diff)
             # Find alignments stats
             stats = findStats(reference, alignments)
-            # Find differences by gene
-            dif_by_gene = findDifferencesbyGene(compact, {'gene1':[5000,6000]})
             # Write differences to file
             writeToFile(path_output+fileName, reference, compact, stats)
+
+            # START of part 2
+            # Compact differences by column
+            differences = compactDifferences2(compact)
+            # Print differences to file
+            writeToFile2(path_output+fileName, reference, differences, stats)
+            
+            # Find differences by gene
+            dif_by_gene = findDifferencesbyGene(compact, {'gene1':[5000,6000]})
+            
             #Store differences by aligner
             all_differences_by_aligner[fileName] = dict()
             all_differences_by_aligner[fileName] = compact 
