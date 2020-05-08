@@ -142,31 +142,6 @@ def compactDifferences(differences):
 
     return new_Differences
 
-
-def printDifferences(reference, compactDifferences):
-    """
-        Print all differences to terminal
-
-        :param reference:
-            A dict of the form {ref_id : reference}
-        :param compactDifferences:
-            The compactDifferences obtained from compactDifferences()
-    """ 
-    ref_id = list(reference.keys())[0]
-    ref = "##Ref={}, len={}".format(ref_id, len(reference[ref_id]))
-    fields = "START\tLENGTH\tTYPE\tREF\tSEQ\t"
-    value = "{}\t{}\t{}\t{}\t{}\t"
-    print(ref)
-    for align_id in compactDifferences.keys():
-        seq = "##Seq={}".format(align_id)
-        print(seq)
-        print(fields)
-        for diff in compactDifferences[align_id]:
-            temp = value.format(
-                diff['start']+1, diff['length'], diff['type'], diff['ref'], diff['seq'])
-            print(temp)
-
-
 def findStats(reference, alignments):
     """
         For each alignment, find its stats (no. of Matches, no. of Mismatches, no. of NAs)
@@ -245,6 +220,58 @@ def writeToFile(fileName, reference, compactDifferences, stats):
                     diff['start']+1, diff['length'], diff['type'], diff['ref'], diff['seq'])
                 f.write(temp)
 
+def findCommonDifferences(differencesByAligner):
+    """
+        Store all common differences
+        :param differencesByAligner:
+            A dict of the form {aligner_1 : differences, aligner_2 : differences}
+    """
+    common_diff = list()
+
+    for aligner in differencesByAligner:
+        for seq_id in aligner.keys():
+            if not common_diff[seq_id]:
+                common_diff[seq_id] = set()
+            common_diff[seq_id] = common_diff[seq_id] & set(aligner[seq_id])
+    return common_diff
+            
+
+def findDifferencesbyGene(compactDifferences, genes):
+    """
+        Store all differences by gene
+        :param compactDifferences:
+            A dict of differences {'seq_id':[differences]}
+        :param genes:
+            A dict of genes {gene_id1 : [start_pos, end_pos]}
+        :returns:
+            A dict of differences by gene {'gene_id1 : {'align_id1' : [differences]}}
+    """
+    differences_by_gene = dict()
+
+    # Initize dict for each gene
+    for gene_id in genes.keys():
+        differences_by_gene[gene_id] = dict()
+        # Initiliaze dict for each alignment
+        for seq_id in compactDifferences.keys():
+            differences_by_gene[gene_id][seq_id] = list()
+
+    for seq_id in compactDifferences.keys():
+        for i in range(0, len(compactDifferences[seq_id])):
+            curr_diff = compactDifferences[seq_id][i]
+            for gene_id in genes.keys():
+                gene_start = genes[gene_id][0]
+                gene_stop = genes[gene_id][1]
+                # check if difference is in gene range
+                if (curr_diff['start']+1 >= gene_start) and (curr_diff['start']+1+curr_diff['length'] < gene_stop):
+                    # initialize list if not already initialized 
+                    #if seq_id not in differences_by_gene[gene_id].keys():
+                    #    differences_by_gene[gene_id][seq_id] = list()
+                    # check if curr_diff has not already been found
+                    if curr_diff not in differences_by_gene[gene_id][seq_id]:
+                        differences_by_gene[gene_id][seq_id].append(curr_diff)
+
+    return differences_by_gene
+
 
 def parseClustal(referenceId, fileName):
     """
@@ -292,6 +319,7 @@ def parseClustal(referenceId, fileName):
 def main():
     path_alignments = "./Alignments/"
     path_output = "./Outputs/"
+    all_differences_by_aligner = dict()
     for file in os.listdir(path_alignments):
         if file.endswith(".clw"):  # for each .clw file
             # Obtain filename, will be used for both input and output
@@ -305,9 +333,15 @@ def main():
             compact = compactDifferences(diff)
             # Find alignments stats
             stats = findStats(reference, alignments)
+            # Find differences by gene
+            dif_by_gene = findDifferencesbyGene(compact, {'gene1':[5000,6000]})
             # Write differences to file
             writeToFile(path_output+fileName, reference, compact, stats)
-
+            #Store differences by aligner
+            all_differences_by_aligner[fileName] = dict()
+            all_differences_by_aligner[fileName] = compact 
+    
+    #writeToFile2(path_output+'result',all_differences_by_aligner)
 
 if __name__ == "__main__":
     main()
