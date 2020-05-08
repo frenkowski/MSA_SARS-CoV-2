@@ -200,12 +200,15 @@ def compactDifferences2(compactDifferences):
     def optmizeDifferences(differences):
         result = list()
         
-        differences = []
-        if differences:
-            for diff1, diff2 in zip(differences, differences[1:]):
-                if diff1['start'] == diff2['start']:
-                    curr_differences.append(diff1)
-                    pass
+        diff_by_start = dict()
+        for diff in differences:
+            starting_pos = diff['start']
+            if not diff_by_start[starting_pos]:
+                diff_by_start[starting_pos] = []
+            diff_by_start[starting_pos] = diff
+        
+        for start in diff_by_start.keys():
+            pass
         
         return result
 
