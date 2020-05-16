@@ -209,43 +209,45 @@ def compactDifferences2(compactDifferences):
         
         # For each list of diff that start at the same pos
         for start in diff_by_start.keys():
-            index = list()
-            values = list()
+            curr_differences = diff_by_start[start]
+            number_of_differences = len(diff_by_start[start])
 
-            # Take the first diff as reference
-            curr_diff = diff_by_start[0]
+            # Group by next base
+            diff_by_first_base = dict()
+            for diff in curr_differences:
+                first_base = diff['seq'][0]
+                # Initialize dict
+                if first_base not in diff_by_first_base.keys():
+                    diff_by_first_base[first_base] = []
+                # Add diff
+                diff_by_first_base[first_base].append(diff)
 
-            # Initialize index and value
-            for i in range(0,len(diff_by_start[start])):
-                index[i] = 0
-                values[i] = diff_by_start[start]['seq']
-
-            # Try to extend diffs
-            are_equal = list()
-            are_not_equal = list()
-            for i in range(1, len(diff_by_start[start])):
-                if values[i] == values[0]:
-                    are_equal.append(i)
-                else:
-                    are_not_equal.append(i)
+            for base in diff_by_first_base:
+                curr_differences_first = diff_by_first_base[base]
+            
+            # ### OLD
+            # # Try to extend diffs
+            # are_equal = list()
+            # are_not_equal = list()
+            # for i in range(1, len(diff_by_start[start])):
+            #     if values[i] == values[0]:
+            #         are_equal.append(i)
+            #     else:
+            #         are_not_equal.append(i)
                 
-            # Compact are_equal, extend curr_diff
-            for eq in are_equal:
-                # Add seq_id to where field
-                if diff_by_start[start]['where'] not in curr_diff['where']:
-                    curr_diff['where'].append(diff_by_start[start]['where'])
-                # Increase diff length if necessary
-                if index[0] != 0:
-                    curr_diff['length'] = curr_diff['length'] + 1
+            # # Compact are_equal, extend curr_diff
+            # for eq in are_equal:
+            #     # Add seq_id to where field
+            #     if diff_by_start[start]['where'] not in curr_diff['where']:
+            #         curr_diff['where'].append(diff_by_start[start]['where'])
+            #     # Increase diff length if necessary
+            #     if index[0] != 0:
+            #         curr_diff['length'] = curr_diff['length'] + 1
 
-            # Compact are_not_equal
-            for not_eq in are_not_equal:
-                
+            # # Compact are_not_equal
+            # for not_eq in are_not_equal:
+            #     pass
 
-
-
-
-        
         return result
 
 def findCommonDifferences(differencesByAligner):
@@ -308,6 +310,32 @@ def findStats(reference, alignments):
 
     return stats
 
+def compactDifferencesByAligner(all_differences_by_aligner):
+    result = list()
+    aligns_field = list()
+
+    for aligner in all_differences_by_aligner.keys():
+        for diff in aligner:
+            # Check if diff is present in other alignments'diff
+            for other_aligner in (all_differences_by_aligner.keys()-aligner):
+                # Obtain the list that contains all its diffs
+                other_aligner_diffs = all_differences_by_aligner[other_aligner]
+                if diff in other_aligner_diffs:
+                    # remove diff (since it's duplicated)
+                    other_aligner_diffs.remove(diff)
+                    # add diff to aligns
+                    aligns_field.append(other_aligner)
+            
+            diff['aligns'] = aligns_field
+            aligns_field = []
+
+            result.append(diff)
+            
+    ## TODO: sort by starting pos?
+    # result = result.sort(reverse=False, key=getStartingPos())
+    # result = result.sort(key=lambda x: x['start'])
+    return result
+        
 def main():
     path_alignments = "./Alignments/"
     path_output = "./Outputs/"
@@ -333,12 +361,12 @@ def main():
             differences = compactDifferences2(compact)
             # Print differences to file
             writeToFile2(path_output+fileName, reference, differences, stats)
-            
             #Store differences by aligner
             all_differences_by_aligner[fileName] = dict()
-            all_differences_by_aligner[fileName] = compact 
-    
-    #writeToFile2(path_output+'result',all_differences_by_aligner)
+            all_differences_by_aligner[fileName] = differences
+     
+    #result = compactDifferencesByAligner(all_differences_by_aligner)
+    #writeToFile3(path_output+'finalResult',result)
 
 if __name__ == "__main__":
     main()
