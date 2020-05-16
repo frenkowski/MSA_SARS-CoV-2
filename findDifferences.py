@@ -1,7 +1,6 @@
 from collections import OrderedDict  # Remembers the order entries were added
-import re
 import os
-
+from differencesIO import parseClustal, writeToFile, writeToFile2
 
 def findDifferences(reference, alignments):
     """
@@ -200,18 +199,69 @@ def compactDifferences2(compactDifferences):
     def optmizeDifferences(differences):
         result = list()
         
+        # Store diffs that start at the same pos
         diff_by_start = dict()
         for diff in differences:
             starting_pos = diff['start']
             if not diff_by_start[starting_pos]:
                 diff_by_start[starting_pos] = []
-            diff_by_start[starting_pos] = diff
+            diff_by_start[starting_pos].append(diff)
         
+        # For each list of diff that start at the same pos
         for start in diff_by_start.keys():
-            pass
+            index = list()
+            values = list()
+
+            # Take the first diff as reference
+            curr_diff = diff_by_start[0]
+
+            # Initialize index and value
+            for i in range(0,len(diff_by_start[start])):
+                index[i] = 0
+                values[i] = diff_by_start[start]['seq']
+
+            # Try to extend diffs
+            are_equal = list()
+            are_not_equal = list()
+            for i in range(1, len(diff_by_start[start])):
+                if values[i] == values[0]:
+                    are_equal.append(i)
+                else:
+                    are_not_equal.append(i)
+                
+            # Compact are_equal, extend curr_diff
+            for eq in are_equal:
+                # Add seq_id to where field
+                if diff_by_start[start]['where'] not in curr_diff['where']:
+                    curr_diff['where'].append(diff_by_start[start]['where'])
+                # Increase diff length if necessary
+                if index[0] != 0:
+                    curr_diff['length'] = curr_diff['length'] + 1
+
+            # Compact are_not_equal
+            for not_eq in are_not_equal:
+                
+
+
+
+
         
         return result
 
+def findCommonDifferences(differencesByAligner):
+    """
+        Store all common differences
+        :param differencesByAligner:
+            A dict of the form {aligner_1 : differences, aligner_2 : differences}
+    """
+    common_diff = list()
+
+    for aligner in differencesByAligner:
+        for seq_id in aligner.keys():
+            if not common_diff[seq_id]:
+                common_diff[seq_id] = set()
+            common_diff[seq_id] = common_diff[seq_id] & set(aligner[seq_id])
+    return common_diff
 
 def findStats(reference, alignments):
     """
@@ -258,170 +308,6 @@ def findStats(reference, alignments):
 
     return stats
 
-
-def writeToFile(fileName, reference, compactDifferences, stats):
-    """
-        Print all differences to terminal
-        :param fileName:
-            The name of the file that will be used to store the differences (WITHOUT the extension)
-        :param reference:
-            A dict of the form {ref_id : reference}
-        :param compactDifferences:
-            The compactDifferences obtained from compactDifferences()
-        :param stats:
-            The stats obtained from findStats()
-    """
-    ref_id = list(reference.keys())[0]
-    ref = "##Ref={},len={},NA={}\n".format(
-        ref_id, len(reference[ref_id]), stats[ref_id]['na'])
-    fields = "START\tLENGTH\tTYPE\tREF\tSEQ\t\n"
-    value = "{}\t{}\t{}\t{}\t{}\t\n"
-    path = "{}.mad".format(fileName)  # MAD = Multiple Alignment Difference
-    with open(path, "w") as f:
-        f.write(ref)
-        for align_id in compactDifferences.keys():
-            seq = "##Seq={},Matches={},Mismatches={},NA={}\n".format(align_id,
-                                                                    stats[align_id]['matches'],
-                                                                    stats[align_id]['mismatches'],
-                                                                    stats[align_id]['na'])
-            f.write(seq)
-            f.write(fields)
-            for diff in compactDifferences[align_id]:
-                temp = value.format(
-                    diff['start']+1, diff['length'], diff['type'], diff['ref'], diff['seq'])
-                f.write(temp)
-
-def writeToFile2(fileName, reference, differences, stats):
-    """
-        Print all differences to terminal
-        :param fileName:
-            The name of the file that will be used to store the differences (WITHOUT the extension)
-        :param reference:
-            A dict of the form {ref_id : reference}
-        :param differences:
-            A list of differences with the 'where' field from compactDifferences2()
-        :param stats:
-            The stats obtained from findStats()
-    """
-    ref_id = list(reference.keys())[0]
-    ref = "##Ref={},len={},NA={}\t\n".format(
-        ref_id, len(reference[ref_id]), stats[ref_id]['na'])
-    fields = "START\tLENGTH\tTYPE\tREF\tSEQ\tWHERE\t\n"
-    value = "{}\t{}\t{}\t{}\t{}\t{}\t\n"
-    path = "{}.mad2".format(fileName)  # MAD2 = Multiple Alignment Difference 2
-    with open(path, "w") as f:
-        f.write(ref)
-        stats.pop(ref_id) # remove stats relative to ref
-        for align_id in stats.keys():
-            seq = "##Seq={},Matches={},Mismatches={},NA={}\n".format(align_id,
-                                                                    stats[align_id]['matches'],
-                                                                    stats[align_id]['mismatches'],
-                                                                    stats[align_id]['na'])
-            f.write(seq)
-        
-        f.write(fields)
-        for diff in differences:
-            temp = value.format(
-                diff['start']+1, diff['length'], diff['type'], diff['ref'], diff['seq'],diff['where'])
-            f.write(temp)
-
-
-def findCommonDifferences(differencesByAligner):
-    """
-        Store all common differences
-        :param differencesByAligner:
-            A dict of the form {aligner_1 : differences, aligner_2 : differences}
-    """
-    common_diff = list()
-
-    for aligner in differencesByAligner:
-        for seq_id in aligner.keys():
-            if not common_diff[seq_id]:
-                common_diff[seq_id] = set()
-            common_diff[seq_id] = common_diff[seq_id] & set(aligner[seq_id])
-    return common_diff
-            
-
-def findDifferencesbyGene(compactDifferences, genes):
-    """
-        Store all differences by gene
-        :param compactDifferences:
-            A dict of differences {'seq_id':[differences]}
-        :param genes:
-            A dict of genes {gene_id1 : [start_pos, end_pos]}
-        :returns:
-            A dict of differences by gene {'gene_id1 : {'align_id1' : [differences]}}
-    """
-    differences_by_gene = dict()
-
-    # Initize dict for each gene
-    for gene_id in genes.keys():
-        differences_by_gene[gene_id] = dict()
-        # Initiliaze dict for each alignment
-        for seq_id in compactDifferences.keys():
-            differences_by_gene[gene_id][seq_id] = list()
-
-    for seq_id in compactDifferences.keys():
-        for i in range(0, len(compactDifferences[seq_id])):
-            curr_diff = compactDifferences[seq_id][i]
-            for gene_id in genes.keys():
-                gene_start = genes[gene_id][0]
-                gene_stop = genes[gene_id][1]
-                # check if difference is in gene range
-                if (curr_diff['start']+1 >= gene_start) and (curr_diff['start']+1+curr_diff['length'] < gene_stop):
-                    # initialize list if not already initialized 
-                    #if seq_id not in differences_by_gene[gene_id].keys():
-                    #    differences_by_gene[gene_id][seq_id] = list()
-                    # check if curr_diff has not already been found
-                    if curr_diff not in differences_by_gene[gene_id][seq_id]:
-                        differences_by_gene[gene_id][seq_id].append(curr_diff)
-
-    return differences_by_gene
-
-
-def parseClustal(referenceId, fileName):
-    """
-        Parse Clustal file
-
-        :param referenceId:
-            The id of the reference as of the .clw file
-        :param fileName:
-            The name of the file that contains the alignments (WITHOUT the extension)
-        :returns:
-            A dict containing the reference, and a dict containing the alignments
-    """
-    alignments = dict()
-    reference = dict()
-    path = "{}.clw".format(fileName)
-    with open(path, "r") as f:
-
-        # Remove header
-        lines = f.readlines()[1:]
-        for line in lines:
-
-            # remove (as many as possible) spaces, *, \n from beginning and end of string
-            line = line.strip(" *\n")
-            # replace tabs with spaces for split
-            line = line.replace('\t', ' ')
-            # replace multiple spaces with single space for split
-            line = re.sub(' +', ' ', line)
-
-            if line != '':
-                line_to_list = line.split()
-                key = line_to_list[0]
-                align = line_to_list[1]
-                # if len(line_to_list) == 3:  # Note: only some aligners show base count
-                #    num_of_bases = line_to_list[2]
-                if key not in alignments.keys():  # Create dict entry
-                    alignments[key] = ''
-                alignments[key] = alignments[key] + align
-
-        ref = alignments.pop(referenceId)
-        reference[referenceId] = ref
-
-        return reference, alignments
-
-
 def main():
     path_alignments = "./Alignments/"
     path_output = "./Outputs/"
@@ -447,9 +333,6 @@ def main():
             differences = compactDifferences2(compact)
             # Print differences to file
             writeToFile2(path_output+fileName, reference, differences, stats)
-            
-            # Find differences by gene
-            dif_by_gene = findDifferencesbyGene(compact, {'gene1':[5000,6000]})
             
             #Store differences by aligner
             all_differences_by_aligner[fileName] = dict()
