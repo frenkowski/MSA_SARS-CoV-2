@@ -1,3 +1,4 @@
+### WILL BE USED IN PART 2
 def findDifferencesbyGene(compactDifferences, genes):
     """
         Store all differences by gene
