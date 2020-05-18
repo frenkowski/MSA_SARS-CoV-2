@@ -149,7 +149,7 @@ def writeToFile3(fileName, reference, differences):
         
         f.write(fields)
         for diff in differences:
-            where_to_string = str(diff['where']).strip('[]').replace('\'','')
+            where_to_string = str(diff['where']).strip('{}').replace('\'','')
             aligns_to_string = str(diff['aligns']).strip('[]').replace('\'','')
             temp = value.format(
                 diff['start']+1, 

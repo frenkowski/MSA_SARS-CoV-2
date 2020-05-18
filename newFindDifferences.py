@@ -41,8 +41,8 @@ def findDifferences(reference, alignments):
                 # Store the length
                 curr_diff['length'] = 1
                 # Store the sequence_id where it happens
-                curr_diff['where'] = list()
-                curr_diff['where'].append(align_id)
+                curr_diff['where'] = set()
+                curr_diff['where'].add(align_id)
 
                 # Determine the difference type
                 if ref[i] == 'N':
@@ -81,7 +81,7 @@ def findDifferences(reference, alignments):
                 for diff in temp_differences:
                     if curr_diff['seq'] == diff['seq']:
                         found = True
-                        diff['where'] = diff['where'] + curr_diff['where']
+                        diff['where'] = diff['where'].union(curr_diff['where'])
                         break 
                 if not found:
                     temp_differences.append(curr_diff)
