@@ -118,7 +118,7 @@ def writeToFile2(fileName, reference, differences, stats):
                 where_to_string)
             f.write(temp)
 
-def writeToFile3(fileName, reference, differences, stats):
+def writeToFile3(fileName, reference, differences):
     """
         Print all differences to terminal
         :param fileName:
@@ -131,14 +131,14 @@ def writeToFile3(fileName, reference, differences, stats):
             The stats obtained from findStats()
     """
     ref_id = list(reference.keys())[0]
-    ref = "##Ref={},len={},NA={}\t\n".format(
-        ref_id, len(reference[ref_id]), stats[ref_id]['na'])
+    ref = "##Ref={},len={},\t\n".format(
+        ref_id, len(reference[ref_id]))
     fields = "START\tLENGTH\tTYPE\tREF\tSEQ\tWHERE\t\n"
     value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t\n"
     path = "{}.mad3".format(fileName)  # MAD3 = Multiple Alignment Difference 3
     with open(path, "w") as f:
         f.write(ref)
-        stats.pop(ref_id) # remove stats relative to ref
+        #stats.pop(ref_id) # remove stats relative to ref
         
         # for align_id in stats.keys():
         #     seq = "##Seq={},Matches={},Mismatches={},NA={}\n".format(align_id,

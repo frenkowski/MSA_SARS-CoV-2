@@ -309,32 +309,6 @@ def findStats(reference, alignments):
                 stats[align_id]['mismatches'] = stats[align_id]['mismatches'] + 1
 
     return stats
-
-def compactDifferencesByAligner(all_differences_by_aligner):
-    result = list()
-    aligns_field = list()
-
-    for aligner in all_differences_by_aligner.keys():
-        for diff in aligner:
-            # Check if diff is present in other alignments'diff
-            for other_aligner in (all_differences_by_aligner.keys()-aligner):
-                # Obtain the list that contains all its diffs
-                other_aligner_diffs = all_differences_by_aligner[other_aligner]
-                if diff in other_aligner_diffs:
-                    # remove diff (since it's duplicated)
-                    other_aligner_diffs.remove(diff)
-                    # add diff to aligns
-                    aligns_field.append(other_aligner)
-            
-            diff['aligns'] = aligns_field
-            aligns_field = []
-
-            result.append(diff)
-            
-    ## TODO: sort by starting pos?
-    # result = result.sort(reverse=False, key=getStartingPos())
-    # result = result.sort(key=lambda x: x['start'])
-    return result
         
 def main():
     path_alignments = "./Alignments/"

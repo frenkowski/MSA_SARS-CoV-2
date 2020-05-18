@@ -1,6 +1,6 @@
 import os
 from differencesIO import parseClustal, writeToFile, writeToFile2, writeToFile3
-from findDifferences import findStats, compactDifferencesByAligner
+from findDifferences import findStats
 
 def findDifferences(reference, alignments):
     """
@@ -148,6 +148,32 @@ def findDifferences(reference, alignments):
 
     return differences
 
+def compactDifferencesByAligner(all_differences_by_aligner):
+    result = list()
+    aligns_field = list()
+
+    for aligner in all_differences_by_aligner.keys():
+        for diff in all_differences_by_aligner[aligner]:
+            # Check if diff is present in other alignments'diff
+            for other_aligner in (all_differences_by_aligner.keys()-aligner):
+                # Obtain the list that contains all its diffs
+                other_aligner_diffs = all_differences_by_aligner[other_aligner]
+                if diff in other_aligner_diffs:
+                    # remove diff (since it's duplicated)
+                    other_aligner_diffs.remove(diff)
+                    # add diff to aligns
+                    aligns_field.append(other_aligner)
+            
+            diff['aligns'] = aligns_field
+            aligns_field = []
+
+            result.append(diff)
+            
+    ## TODO: sort by starting pos?
+    # result = result.sort(reverse=False, key=getStartingPos())
+    result.sort(key=lambda x: x['start'])
+    #print(result)
+    return result
 
 def main():
     #differences = findDifferences({'3':'a'},{'1':'a','2':'a'})
@@ -180,8 +206,8 @@ def main():
             all_differences_by_aligner[fileName] = dict()
             all_differences_by_aligner[fileName] = differences
     
-    #result = compactDifferencesByAligner(all_differences_by_aligner)
-    #writeToFile3(path_output+'finalResult',result)
+    result = compactDifferencesByAligner(all_differences_by_aligner)
+    writeToFile3(path_output+'finalResult',reference,result)
 
 if __name__ == "__main__":
     main()
