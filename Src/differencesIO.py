@@ -13,7 +13,7 @@ def parseClustal(referenceId, fileName):
     """
     alignments = dict()
     reference = dict()
-    path = "{}.clw".format(fileName)
+    path = "{}.aln".format(fileName)
     with open(path, "r") as f:
 
         # Remove header
@@ -33,6 +33,8 @@ def parseClustal(referenceId, fileName):
                 align = line_to_list[1]
                 # if len(line_to_list) == 3:  # Note: only some aligners show base count
                 #    num_of_bases = line_to_list[2]
+                if key.endswith((".1",".2")):
+                    key = key[:-2]
                 if key not in alignments.keys():  # Create dict entry
                     alignments[key] = ''
                 alignments[key] = alignments[key] + align
@@ -42,7 +44,7 @@ def parseClustal(referenceId, fileName):
 
         return reference, alignments
 
-def writeToFile(fileName, reference, compactDifferences, stats):
+def writeToFilePairwise(fileName, reference, compactDifferences, stats):
     """
         Print all differences to terminal
         :param fileName:
@@ -57,7 +59,7 @@ def writeToFile(fileName, reference, compactDifferences, stats):
     ref_id = list(reference.keys())[0]
     ref = "##Ref={},len={},NA={}\n".format(
         ref_id, len(reference[ref_id]), stats[ref_id]['na'])
-    fields = "START\tLENGTH\tTYPE\tREF\tSEQ\t\n"
+    fields = "#START\tLENGTH\tTYPE\tREF\tSEQ\t\n"
     value = "{}\t{}\t{}\t{}\t{}\t\n"
     path = "{}.mad".format(fileName)  # MAD = Multiple Alignment Difference
     with open(path, "w") as f:
@@ -78,7 +80,7 @@ def writeToFile(fileName, reference, compactDifferences, stats):
                     diff['seq'])
                 f.write(temp)
 
-def writeToFile2(fileName, reference, differences, stats):
+def writeToFileMSA(fileName, reference, differences, stats):
     """
         Print all differences to terminal
         :param fileName:
@@ -91,10 +93,10 @@ def writeToFile2(fileName, reference, differences, stats):
             The stats obtained from findStats()
     """
     ref_id = list(reference.keys())[0]
-    ref = "##Ref={},len={},NA={}\t\n".format(
+    ref = "##Ref={},len={},NA={}\n".format(
         ref_id, len(reference[ref_id]), stats[ref_id]['na'])
-    fields = "START\tLENGTH\tTYPE\tREF\tSEQ\tWHERE\t\n"
-    value = "{}\t{}\t{}\t{}\t{}\t{}\t\n"
+    fields = "#START\tLENGTH\tTYPE\tREF\tSEQ\tWHERE\n"
+    value = "{}\t{}\t{}\t{}\t{}\t{}\n"
     path = "{}.mad2".format(fileName)  # MAD2 = Multiple Alignment Difference 2
     with open(path, "w") as f:
         f.write(ref)
@@ -118,7 +120,7 @@ def writeToFile2(fileName, reference, differences, stats):
                 where_to_string)
             f.write(temp)
 
-def writeToFile3(fileName, reference, differences):
+def writeToFileFinal(fileName, reference, differences, stats):
     """
         Print all differences to terminal
         :param fileName:
@@ -131,26 +133,30 @@ def writeToFile3(fileName, reference, differences):
             The stats obtained from findStats()
     """
     ref_id = list(reference.keys())[0]
-    ref = "##Ref={},len={},\t\n".format(
+    ref = "##Ref={},len={}\n".format(
         ref_id, len(reference[ref_id]))
-    fields = "START\tLENGTH\tTYPE\tREF\tSEQ\tWHERE\t\n"
-    value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t\n"
+    fields = "#START\tLENGTH\tTYPE\tREF\tSEQ\tWHERE\tTOOLS\n"
+    value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\n"
     path = "{}.mad3".format(fileName)  # MAD3 = Multiple Alignment Difference 3
     with open(path, "w") as f:
         f.write(ref)
-        #stats.pop(ref_id) # remove stats relative to ref
         
-        # for align_id in stats.keys():
-        #     seq = "##Seq={},Matches={},Mismatches={},NA={}\n".format(align_id,
-        #                                                             stats[align_id]['matches'],
-        #                                                             stats[align_id]['mismatches'],
-        #                                                             stats[align_id]['na'])
-        #     f.write(seq)
+        for tool in stats.keys():
+            #print(stats[tool][ref_id])
+            #stats[tool].pop(ref_id) # remove stats about ref
+            for align_id in stats[tool].keys():
+                seq = "##Tool={},Seq={},Matches={},Mismatches={},NA={}\n".format(
+                                                                        tool,
+                                                                        align_id,
+                                                                        stats[tool][align_id]['matches'],
+                                                                        stats[tool][align_id]['mismatches'],
+                                                                        stats[tool][align_id]['na'])
+                f.write(seq)
         
         f.write(fields)
         for diff in differences:
-            where_to_string = str(diff['where']).strip('{}').replace('\'','')
-            aligns_to_string = str(diff['aligns']).strip('[]').replace('\'','')
+            where_to_string = str(diff['where']).strip('{}').replace('\'','').replace(' ','')
+            aligns_to_string = str(diff['aligns']).strip('[]').replace('\'','').replace(' ','')
             temp = value.format(
                 diff['start']+1, 
                 diff['length'], 

@@ -1,6 +1,6 @@
 import os
-from differencesIO import parseClustal, writeToFile, writeToFile2, writeToFile3
-from findDifferences import findStats
+from differencesIO import parseClustal, writeToFileMSA, writeToFileFinal
+from findDifferencesPairwise import findStats
 
 def findDifferences(reference, alignments):
     """
@@ -186,11 +186,12 @@ def main():
     #differences = findDifferences({'3':'aaaa'},{'1':'abbb','2':'abbb'})
     #print(differences)
 
-    path_alignments = "./Alignments/"
-    path_output = "./Outputs/"
+    path_alignments = "../Alignments/"
+    path_output = "../Outputs/"
     all_differences_by_aligner = dict()
+    all_stats_by_aligner = dict()
     for file in os.listdir(path_alignments):
-        if file.endswith(".clw"):  # for each .clw file
+        if file.endswith(".aln"):  # for each .clw file
             # Obtain filename, will be used for both input and output
             fileName = os.path.splitext(file)[0]
             # Parse reference and alignments from file
@@ -201,13 +202,16 @@ def main():
             # Find alignments stats
             stats = findStats(reference, alignments)
             # Write differences to file
-            writeToFile2(path_output+fileName, reference, differences, stats)
+            writeToFileMSA(path_output+fileName, reference, differences, stats)
             #Store differences by aligner
             all_differences_by_aligner[fileName] = dict()
             all_differences_by_aligner[fileName] = differences
+            #Store stats by aligner
+            all_stats_by_aligner[fileName] = dict()
+            all_stats_by_aligner[fileName] = stats
     
     result = compactDifferencesByAligner(all_differences_by_aligner)
-    writeToFile3(path_output+'finalResult',reference,result)
+    writeToFileFinal(path_output+'finalResult',reference,result, all_stats_by_aligner)
 
 if __name__ == "__main__":
     main()
