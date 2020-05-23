@@ -141,16 +141,20 @@ def writeToFileFinal(fileName, reference, differences, stats):
     with open(path, "w") as f:
         f.write(ref)
         
-        for tool in stats.keys():
+        #for tool in stats.keys():
             #print(stats[tool][ref_id])
             #stats[tool].pop(ref_id) # remove stats about ref
-            for align_id in stats[tool].keys():
+            #for align_id in stats[tool].keys():
+        #print(stats)
+        for align_id in stats.keys():
+            #stats.pop(ref_id)
+            for stat in stats[align_id]:
                 seq = "##Tool={},Seq={},Matches={},Mismatches={},NA={}\n".format(
-                                                                        tool,
+                                                                        stat['aligner'],
                                                                         align_id,
-                                                                        stats[tool][align_id]['matches'],
-                                                                        stats[tool][align_id]['mismatches'],
-                                                                        stats[tool][align_id]['na'])
+                                                                        stat['matches'],
+                                                                        stat['mismatches'],
+                                                                        stat['na'])
                 f.write(seq)
         
         f.write(fields)

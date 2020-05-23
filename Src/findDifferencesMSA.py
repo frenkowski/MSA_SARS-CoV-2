@@ -149,6 +149,15 @@ def findDifferences(reference, alignments):
     return differences
 
 def compactDifferencesByAligner(all_differences_by_aligner):
+    """
+        Computes the align field for each diff
+
+        :param reference:
+            A dict of the form {aligner_1 : differences, aligner_2 : differences}
+
+        :returns:
+            A list of differences, with the align field for each diff.
+    """
     result = list()
     aligns_field = list()
 
@@ -189,7 +198,8 @@ def main():
     path_alignments = "../Alignments/"
     path_output = "../Outputs/"
     all_differences_by_aligner = dict()
-    all_stats_by_aligner = dict()
+    #all_stats_by_aligner = dict()
+    all_stats_by_id = dict()
     for file in os.listdir(path_alignments):
         if file.endswith(".aln"):  # for each .clw file
             # Obtain filename, will be used for both input and output
@@ -207,11 +217,18 @@ def main():
             all_differences_by_aligner[fileName] = dict()
             all_differences_by_aligner[fileName] = differences
             #Store stats by aligner
-            all_stats_by_aligner[fileName] = dict()
-            all_stats_by_aligner[fileName] = stats
+            #all_stats_by_aligner[fileName] = dict()
+            #all_stats_by_aligner[fileName] = stats
+            #Store stats by align_id
+            for align_id in alignments.keys():
+                if align_id not in all_stats_by_id.keys():
+                    all_stats_by_id[align_id] = list()
+                # Store aligner name
+                stats[align_id]['aligner'] = fileName
+                all_stats_by_id[align_id].append(stats[align_id])
     
     result = compactDifferencesByAligner(all_differences_by_aligner)
-    writeToFileFinal(path_output+'finalResult',reference,result, all_stats_by_aligner)
+    writeToFileFinal(path_output+'finalResult',reference,result, all_stats_by_id)
 
 if __name__ == "__main__":
     main()
