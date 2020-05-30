@@ -94,6 +94,7 @@ def findDifferences(reference, alignments):
         for diff_to_add in temp_differences:
             extend = False
 
+            #print(active_differences)
             # Try to add diff_to_add to active_differences
             for diff in active_differences:
                 # Consecutive diff
@@ -120,16 +121,10 @@ def findDifferences(reference, alignments):
                         extend = True
                         temp_differences.remove(diff_to_add)
                         break
-                    # else: # New diff that start at next pos
-                    #     differences.append(diff)
-                    #     # Remove diff to active differences
-                    #     active_differences.remove(diff)
-                    #     # Add diff_to_add to active differences
-                    #     active_differences.append(diff_to_add)
             
             if not extend:
                 active_differences.append(diff_to_add)
-                temp_differences.remove(diff_to_add)
+                #temp_differences.remove(diff_to_add)
 
         # Remove inactive differences
         for diff in active_differences:
@@ -137,6 +132,8 @@ def findDifferences(reference, alignments):
             if (diff['start'] + diff['length']) < i:
                 differences.append(diff)
                 active_differences.remove(diff)
+
+        temp_differences = []
 
         #if temp_differences != []:
         #    print(temp_differences)
@@ -159,29 +156,34 @@ def compactDifferencesByAligner(all_differences_by_aligner):
             A list of differences, with the align field for each diff.
     """
     result = list()
-    aligns_field = list()
+    aligns_field = set()
 
     for aligner in all_differences_by_aligner.keys():
+        # Compute keys for other aligners
+        other_aligners = [key for key,val in all_differences_by_aligner.items() if key!=aligner]
         for diff in all_differences_by_aligner[aligner]:
+            # Add current aligner to align_field
+            aligns_field.add(aligner)
             # Check if diff is present in other alignments'diff
-            for other_aligner in (all_differences_by_aligner.keys()-aligner):
+            for other_aligner in other_aligners:
                 # Obtain the list that contains all its diffs
                 other_aligner_diffs = all_differences_by_aligner[other_aligner]
                 if diff in other_aligner_diffs:
                     # remove diff (since it's duplicated)
-                    other_aligner_diffs.remove(diff)
+                    #other_aligner_diffs.remove(diff)
                     # add diff to aligns
-                    aligns_field.append(other_aligner)
+                    aligns_field.add(other_aligner)
             
-            diff['aligns'] = aligns_field
-            aligns_field = []
+            # diff must be copied or the change would be propagated
+            temp = diff.copy()
+            temp['aligns'] = aligns_field
+            aligns_field = set()
 
-            result.append(diff)
+            # Check if not already found
+            if temp not in result:
+                result.append(temp)
             
-    ## TODO: sort by starting pos?
-    # result = result.sort(reverse=False, key=getStartingPos())
     result.sort(key=lambda x: x['start'])
-    #print(result)
     return result
 
 def main():
@@ -193,6 +195,7 @@ def main():
     #differences = findDifferences({'3':'aaaa'},{'1':'aaab','2':'aaab'})
     #differences = findDifferences({'3':'aaaa'},{'1':'bbba','2':'bbba'})
     #differences = findDifferences({'3':'aaaa'},{'1':'abbb','2':'abbb'})
+    #differences = findDifferences({'3':'aaaaa'},{'1':'caaaa','2':'---aa', '3':'--aaa'})
     #print(differences)
 
     path_alignments = "../Alignments/"

@@ -160,7 +160,7 @@ def writeToFileFinal(fileName, reference, differences, stats):
         f.write(fields)
         for diff in differences:
             where_to_string = str(diff['where']).strip('{}').replace('\'','').replace(' ','')
-            aligns_to_string = str(diff['aligns']).strip('[]').replace('\'','').replace(' ','')
+            aligns_to_string = str(diff['aligns']).strip('{}').replace('\'','').replace(' ','')
             temp = value.format(
                 diff['start']+1, 
                 diff['length'], 

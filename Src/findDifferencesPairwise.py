@@ -142,6 +142,16 @@ def compactDifferences1(differences):
     return new_Differences
 
 def compactDifferences2(compactDifferences):
+    """
+        Compact for each alignment all the consecutive differences of the same type
+
+        :param differences:
+            The differences dict obtained from findDifferences()
+
+        :returns:
+            A dict containing the "compacted" differences, all having length >= 1
+    """
+
     index = dict()
     values = dict()
     for seq_id in compactDifferences.keys():
@@ -195,60 +205,6 @@ def compactDifferences2(compactDifferences):
                 values.pop(seq_id)
 
     return result
-
-    def optmizeDifferences(differences):
-        result = list()
-        
-        # Store diffs that start at the same pos
-        diff_by_start = dict()
-        for diff in differences:
-            starting_pos = diff['start']
-            if not diff_by_start[starting_pos]:
-                diff_by_start[starting_pos] = []
-            diff_by_start[starting_pos].append(diff)
-        
-        # For each list of diff that start at the same pos
-        for start in diff_by_start.keys():
-            curr_differences = diff_by_start[start]
-            number_of_differences = len(diff_by_start[start])
-
-            # Group by next base
-            diff_by_first_base = dict()
-            for diff in curr_differences:
-                first_base = diff['seq'][0]
-                # Initialize dict
-                if first_base not in diff_by_first_base.keys():
-                    diff_by_first_base[first_base] = []
-                # Add diff
-                diff_by_first_base[first_base].append(diff)
-
-            for base in diff_by_first_base:
-                curr_differences_first = diff_by_first_base[base]
-            
-            # ### OLD
-            # # Try to extend diffs
-            # are_equal = list()
-            # are_not_equal = list()
-            # for i in range(1, len(diff_by_start[start])):
-            #     if values[i] == values[0]:
-            #         are_equal.append(i)
-            #     else:
-            #         are_not_equal.append(i)
-                
-            # # Compact are_equal, extend curr_diff
-            # for eq in are_equal:
-            #     # Add seq_id to where field
-            #     if diff_by_start[start]['where'] not in curr_diff['where']:
-            #         curr_diff['where'].append(diff_by_start[start]['where'])
-            #     # Increase diff length if necessary
-            #     if index[0] != 0:
-            #         curr_diff['length'] = curr_diff['length'] + 1
-
-            # # Compact are_not_equal
-            # for not_eq in are_not_equal:
-            #     pass
-
-        return result
 
 def findCommonDifferences(differencesByAligner):
     """
