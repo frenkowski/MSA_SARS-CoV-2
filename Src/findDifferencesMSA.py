@@ -1,6 +1,7 @@
 import os
-from differencesIO import parseClustal, writeToFileMSA, writeToFileFinal
+from differencesIO import parseFasta, parseClustal, writeToFileMSA, writeToFileFinal
 from findDifferencesPairwise import findStats
+from geneDifferences import findDifferencesbyGene2, transcribeSequence
 
 def findDifferences(reference, alignments):
     """
@@ -232,6 +233,20 @@ def main():
     
     result = compactDifferencesByAligner(all_differences_by_aligner)
     writeToFileFinal(path_output+'finalResult',reference,result, all_stats_by_id)
+
+    #### START OF PART 2 ####
+    genes_NC_045512 = {"ORF1ab":[266,21555], "ORF3a":[25393,26220], "E":[26245,26472], "M":[26523,27191], 
+         "ORF6":[27202,27387], "ORF7a":[27394,27759], "ORF7b":[27756,27887], "ORF8":[27894,28259],
+         "N":[28274,29533], "ORF10":[29558,29674]}
+    
+    reference = parseFasta("../Reference/reference")
+    ref_trs = transcribeSequence(reference) # trs = transcribed
+
+    diff_by_gene = findDifferencesbyGene2(result, genes_NC_045512)
+    trs_by_gene = split_reference_by_cds(result, genes_NC_045512)
+    
+
+
 
 if __name__ == "__main__":
     main()

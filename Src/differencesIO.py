@@ -1,5 +1,26 @@
 import re
 
+def parseFasta(fileName):
+    """
+        Parse FASTA file
+
+        :param fileName:
+            The fileName of the that contains the sequence to parse
+    """
+
+    sequence = ""
+    path = "{}.fa".format(fileName)
+    with open(path, "r") as f:
+        lines = f.readlines()[2:]
+        for line in lines:
+            # remove (as many as possible) spaces, *, \n from beginning and end of string
+            line = line.strip(" *\n")
+            if line != '':
+                sequence += line
+    return sequence
+
+
+
 def parseClustal(referenceId, fileName):
     """
         Parse Clustal file
