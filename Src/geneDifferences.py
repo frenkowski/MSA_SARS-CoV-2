@@ -121,7 +121,3 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene, genes):
 
     ### STEP 2: obtain differences in term of codons
     for gene_id in diff_by_gene.keys():
-
-
-
-
