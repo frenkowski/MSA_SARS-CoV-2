@@ -1,5 +1,5 @@
 import os
-from differencesIO import parseFasta, parseClustal, writeToFileMSA, writeToFileFinal
+from differencesIO import parseFasta, parseClustal, writeToFileMSA, writeToFileFinal, writeCdsDifferencesToFile
 from findDifferencesPairwise import findStats
 from geneDifferences import findDifferencesbyGene2, transcribeSequence, findDifferencesRelativePos
 from geneDifferences import findTranscriptDifferences, splitSequenceByCds
@@ -250,11 +250,9 @@ def main():
     diff_by_gene = findDifferencesbyGene2(result, genes_NC_045512)
     diff_by_gene_relative = findDifferencesRelativePos(diff_by_gene, genes_NC_045512)
 
-    findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes_NC_045512)
-
+    cds_differences = findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes_NC_045512)
+    writeCdsDifferencesToFile(path_output+'finalResult',cds_differences,genes_NC_045512)
     
-
-
 
 if __name__ == "__main__":
     main()

@@ -192,3 +192,34 @@ def writeToFileFinal(fileName, reference, differences, stats):
                 aligns_to_string
             )
             f.write(temp)
+
+def writeCdsDifferencesToFile(fileName, cds_differences, genes):
+    """
+        Print all differences to terminal
+        :param fileName:
+            The name of the file that will be used to store the differences (WITHOUT the extension)
+        :param cds_differences:
+            A list of differences with the 'cod-info' field from findTranscriptDifferences()
+        :param genes:
+            A dict of genes {gene_id1 : [start_pos, end_pos]}
+    """
+    #print("Inside")
+    fields = "#GENE\tSTART\tEND\tSTART-REL\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\n"
+    value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n"
+    path = "{}.mad4".format(fileName)  # MAD4 = Multiple Alignment Difference 4
+    with open(path, "w") as f:
+        f.write(fields)
+        for gene_id in cds_differences.keys():   
+            for diff in cds_differences[gene_id]:
+                for cod_diff in diff['cod-info']:
+                    temp = value.format(
+                        gene_id,
+                        genes[gene_id][0],
+                        genes[gene_id][1],
+                        diff['start_rel'],
+                        cod_diff['ref-cod'],
+                        cod_diff['ref-aa'],
+                        cod_diff['dif-cod'],
+                        cod_diff['dif-aa'],
+                    )
+                    f.write(temp)
