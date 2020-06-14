@@ -1,4 +1,23 @@
 ### WILL BE USED IN PART 2
+
+proteins = {'UUU':'Phe', 'UUC': 'Phe', 'UUA': 'Leu', 'UUG':'Leu',
+        'UCU':'Ser', 'UUC':'Ser', 'UCA':'Ser', 'UCG':'Ser',
+        'UAU':'Tyr', 'UAC':'Tyr', 'UAA':'stop', 'UAG':'stop',
+        'UGU':'Cys', 'UGC':'Cys', 'UGA':'stop', 'UGG':'stop',
+        'CUU':'Leu', 'CUC':'Leu', 'CUA':'Leu', 'CUG':'Leu',
+        'CCU':'Pro', 'CCC':'Pro', 'CCA':'Pro', 'CCG':'Pro',
+        'CAU':'His', 'CAC':'His', 'CAA':'Gin', 'CAG':'Gin',
+        'CGU':'Arg', 'CGC':'Arg', 'CGA':'Arg', 'CGG':'Arg',
+        'AUU':'Ile', 'AUC':'Ile', 'AUA':'Ile', 'AUG':'Met',
+        'ACU':'Thr', 'ACC':'Thr', 'ACA':'Thr', 'ACG':'Thr',
+        'AAU':'Asn', 'AAC':'Asn', 'AAA':'Lys', 'AAG':'Lys',
+        'AGU':'Ser', 'AGC':'Ser', 'AGA':'Arg', 'AGG':'Arg',
+        'GUU':'Val', 'GUC':'Val', 'GUA':'Val', 'GUG':'Val',
+        'GCU':'Ala', 'GCC':'Ala', 'GCA':'Ala', 'GCG':'Ala',
+        'GAU':'Asp', 'GAC':'Asp', 'GAA':'Glu', 'GAG':'Glu',
+        'GGU':'Gly', 'GGC':'Gly', 'GGA':'Gly', 'GGG':'Gly',
+        'UCC':'Ser'}
+
 def findDifferencesbyGene(compactDifferences, genes):
     """
         Store all differences by gene
@@ -14,7 +33,7 @@ def findDifferencesbyGene(compactDifferences, genes):
     # Initize dict for each gene
     for gene_id in genes.keys():
         differences_by_gene[gene_id] = dict()
-        # Initiliaze dict for each alignment
+        # Initiliaze list of diffs for each alignment
         for seq_id in compactDifferences.keys():
             differences_by_gene[gene_id][seq_id] = list()
 
@@ -79,6 +98,8 @@ def transcribeSequence(sequence):
         else:
             result += base
 
+    print('T' in result)
+
     return result
 
 def splitSequenceByCds(sequence, genes):
@@ -103,7 +124,11 @@ def splitSequenceByCds(sequence, genes):
            
             # Split the sequence according to the gene CDS
             # -1 should be necessary since 1-based on FASTA annotation
-            seqs_by_cds[gene_id] = sequence[gene_start-1:gene_stop-1]
+            # +1 on the right since Python considers the right index as non inclusive
+            seqs_by_cds[gene_id] = sequence[gene_start-1:gene_stop-1+1]
+
+            #print(gene_id)
+            #print(len(seqs_by_cds[gene_id])%3==0)
     
     return seqs_by_cds
 
@@ -143,6 +168,8 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes):
         # Split into groups of 3, aka codons
         codons[gene_id] = [curr_seq[i:i+3] for i in range(0, len(curr_seq), 3)]
 
+    #print("Codons: ",codons)
+
     ### STEP 2: obtain codons of differences
     alternative_codons = dict()
     for gene_id in genes.keys():
@@ -152,27 +179,67 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes):
         for diff in diff_by_gene_relative[gene_id]:
             if diff['type'] == 'rep':
                 # Create dict for storing the result
+                #codon_difference = dict()
+                
+                # First replace bases in sequence
+                curr_seq = seqs_by_cds[gene_id]
+
+                #Replace eventual 'T' in diff['seq']
+                #Note: differences are taken from starting DNA and not RNA, so they can contain T
+                if 'T' in diff['seq']:
+                    diff['seq'] = diff['seq'].replace('T','U')
+
+                ## Remove old bases and insert new bases
+                ## keep everything before, add difference, keep everything after
+                curr_seq = curr_seq[:diff['start']] + diff['seq'] + curr_seq[diff['start']+diff['length']:]
+
+                # Now split into codons
+                temp = [curr_seq[i:i+3] for i in range(0, len(curr_seq), 3)]
+                #codon_difference['codons'] = temp
+
+                # add to alternative codons
+                alternative_codons[gene_id].append(temp)
+            
+            elif diff['type'] == 'del':
+                # Create dict for storing the result
                 codon_difference = dict()
                 
                 # First replace bases in sequence
                 curr_seq = seqs_by_cds[gene_id]
-                ## Remove old bases and insert new bases
-                ## keep everything before, add difference, keep everything after
-                ## TODO: check if it actually works as it should
-                curr_seq = curr_seq[:diff['start']] + diff['seq'] + curr_seq[diff['start']+diff['len']:]
+                # Add indels in seq
+                curr_seq = curr_seq[:diff['start']] + '-'*diff['length'] + curr_seq[diff['start']+diff['length']:]
 
                 # Now split into codons
                 temp = [curr_seq[i:i+3] for i in range(0, len(curr_seq), 3)]
-                codon_difference['codons'] = temp
+                #codon_difference['codons'] = temp
 
                 # add to alternative codons
-                alternative_codons[gene_id].append(codon_difference)
-                # TODO: other types of differences
+                alternative_codons[gene_id].append(temp)
 
+
+
+    print("Alternative_codons:",alternative_codons)
     ### STEP 3 : compare ref and seq codon by codon
     for gene_id in alternative_codons.keys():
-        for cod_diff in alternative_codons[gene_id]:
-            for i in range(0, len(cod_diff))    #should also work with len(codons[gene_id])
+        # Store codons of current gene for an easier comparison
+        codons_ref = codons[gene_id]
+        # Compare codons of current gene with codons modified by diffs
+        for codons_diff in alternative_codons[gene_id]:
+            # Compare codon by codon
+            for ref, dif in zip(codons_ref,codons_diff):
+                if ref != dif:
+                    print("REF: ",ref)
+                    print("REF_PROTEIN: ", proteins[ref])
+                    print("DIF: ",dif)
+                    if '-' not in dif:
+                        print("DIF_PROTEIN: ",proteins[dif])
+                    else:
+                        print(" DIF_PROTEIN CAN'T BE TRANSLATED")
+
+            
+
+            '''
+            for i in range(0, len(cod_diff)):    #should also work with len(codons[gene_id])
                 if codons[gene_id][i] != cod_diff[i]:
                     new_diff = dict()
                     # A different codon has been found
@@ -181,5 +248,6 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes):
                     # new_diff['ref-protein'] = create_protein(new_diff['ref-codon'])
                     # new_diff['seq-protein'] = create_protein(new_diff['seq-codon'])
                     result[gene_id].append(new_diff)
+            '''
     
     return result

@@ -2,7 +2,7 @@ import os
 from differencesIO import parseFasta, parseClustal, writeToFileMSA, writeToFileFinal
 from findDifferencesPairwise import findStats
 from geneDifferences import findDifferencesbyGene2, transcribeSequence, findDifferencesRelativePos
-from genesDifferences import findTranscriptDifferences, splitSequenceByCds
+from geneDifferences import findTranscriptDifferences, splitSequenceByCds
 
 def findDifferences(reference, alignments):
     """
@@ -241,15 +241,16 @@ def main():
          "N":[28274,29533], "ORF10":[29558,29674]}
     
     #reference = parseFasta("../Reference/reference")
-    reference = reference["NC_045512"]
-    ref_trs = transcribeSequence(reference) # trs = transcribed
+    #reference = reference["NC_045512"]
+
+    ref_trs = transcribeSequence(reference["NC_045512"]) # trs = transcribed
     seqs_by_cds = splitSequenceByCds(ref_trs, genes_NC_045512)
 
     
     diff_by_gene = findDifferencesbyGene2(result, genes_NC_045512)
     diff_by_gene_relative = findDifferencesRelativePos(diff_by_gene, genes_NC_045512)
 
-    findTranscripts(seqs_by_cds, diff_by_gene_relative, genes_NC_045512)
+    findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes_NC_045512)
 
     
 
