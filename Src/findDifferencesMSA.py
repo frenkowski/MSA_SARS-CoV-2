@@ -251,6 +251,7 @@ def main():
     diff_by_gene_relative = findDifferencesRelativePos(diff_by_gene, genes_NC_045512)
 
     cds_differences = findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes_NC_045512)
+
     writeCdsDifferencesToFile(path_output+'finalResult',cds_differences,genes_NC_045512)
     
 

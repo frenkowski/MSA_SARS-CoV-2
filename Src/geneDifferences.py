@@ -250,13 +250,14 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes):
 
                     diff['cod-info'].append(cod_diff)
                     cod_diff = {}
-                i = i + len(dif)
+                i = i + len(dif) - dif.count('-') # Do not consider indels
 
             if i%3 == 0:
                 diff['still-translatable'] = True
             else:
                 diff['still-translatable'] = False
 
+    # Remove list of codons, useless after this
     for gene_id in diff_by_gene_relative.keys():
         for diff in diff_by_gene_relative[gene_id]:
             diff.pop('codons')

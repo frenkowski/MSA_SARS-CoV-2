@@ -203,23 +203,36 @@ def writeCdsDifferencesToFile(fileName, cds_differences, genes):
         :param genes:
             A dict of genes {gene_id1 : [start_pos, end_pos]}
     """
-    #print("Inside")
-    fields = "#GENE\tSTART\tEND\tSTART-REL\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\n"
-    value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n"
+
+    header = "##Gene={},Start={},End={}\n"
+    fields = "#START-REL\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\tTRANSLATABLE\n"
+    value = "{}\t{}\t{}\t{}\t{}\t{}\n"
     path = "{}.mad4".format(fileName)  # MAD4 = Multiple Alignment Difference 4
     with open(path, "w") as f:
-        f.write(fields)
-        for gene_id in cds_differences.keys():   
+        for gene_id in cds_differences.keys():
+            
+            # Write header
+            header_val = header.format(gene_id, genes[gene_id][0], genes[gene_id][1])
+            f.write(header_val)
+            
+            # Write differences related to gene_id
+            if cds_differences[gene_id]:
+                f.write(fields)
             for diff in cds_differences[gene_id]:
                 for cod_diff in diff['cod-info']:
                     temp = value.format(
-                        gene_id,
-                        genes[gene_id][0],
-                        genes[gene_id][1],
                         diff['start_rel'],
                         cod_diff['ref-cod'],
                         cod_diff['ref-aa'],
                         cod_diff['dif-cod'],
                         cod_diff['dif-aa'],
+                        "Yes" if diff['still-translatable'] else "No"
                     )
                     f.write(temp)
+
+            f.write("\n")
+                #if diff['still-translatable'] == True:
+                #    f.write("----> STILL TRANSLATABLE\n")
+                #else:
+                #    f.write("----> NO LONGER TRANSLATABLE\n")
+
