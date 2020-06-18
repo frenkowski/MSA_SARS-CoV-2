@@ -256,7 +256,10 @@ def main():
     diff_by_gene_relative = findDifferencesRelativePos(diff_by_gene, genes_NC_045512)
 
     # Detect differences in CDS
-    cds_differences = findTranscriptDifferences(ref_by_cds, diff_by_gene_relative, genes_NC_045512)
+    (cds_differences, new_cds_by_seq) = findTranscriptDifferences(ref_by_cds, diff_by_gene_relative, genes_NC_045512, list(alignments.keys()))
+
+    #print("New cds by seq")
+    #print(new_cds_by_seq['MT459899'])
 
     # Write to file differences 
     writeCdsDifferencesToFile(path_output+'CDS_differences',cds_differences,genes_NC_045512)

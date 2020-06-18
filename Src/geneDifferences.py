@@ -153,7 +153,7 @@ def findDifferencesRelativePos(diff_by_gene, genes):
     return diff_by_gene
 
 
-def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes):
+def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes, all_seqs_id):
     
     # Check if ref is %3
 
@@ -259,9 +259,32 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes):
             else:
                 diff['still-translatable'] = False
 
+
+    ### STEP 4 : Obtain, for each sequence and for each CDS, all the new codons
+    new_cds_by_seq = dict()
+    for seq_id in all_seqs_id:
+        # Contains, for each sequence, all its CDSs
+        new_cds_by_seq[seq_id] = dict()
+        for gene_id in genes.keys():
+            # Contains a list of codons
+            new_cds_by_seq[seq_id][gene_id] = list()
+
+    # Initialize all codons with the same values as ref
+    for seq_id in new_cds_by_seq.keys():
+        for gene_id in diff_by_gene_relative.keys():
+            new_cds_by_seq[seq_id][gene_id] = codons[gene_id]
+
+    # Replace codons involved in differences
+    for gene_id in diff_by_gene_relative.keys():
+        for diff in diff_by_gene_relative[gene_id]:
+            for seq_id in diff['where']:
+                for i in range(0, len(codons)):
+                    if codons[gene_id][i] != diff['codons'][i]:
+                        new_cds_by_seq[seq_id][gene_id][i] = diff['codons'][i]
+
     # Remove list of codons, useless after this
     for gene_id in diff_by_gene_relative.keys():
         for diff in diff_by_gene_relative[gene_id]:
             diff.pop('codons')
     
-    return diff_by_gene_relative
+    return (diff_by_gene_relative, new_cds_by_seq)
