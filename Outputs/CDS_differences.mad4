@@ -1,0 +1,64 @@
+##Gene=ORF1ab,Start=266,End=21555
+#START-REL	SEQS	CODON-REF	PROT-REF	CODON-DIF	PROT-DIF	TOOLS
+247	MT457399	CAU	His	CCU	Pro	clustal,kalign,muscle
+1113	MT457392,MT457400	GCA	Ala	UCA	Ser	clustal,kalign,muscle
+1338	MT457399	AAU	Asn	---	None	clustal,muscle
+1339	MT457399	AAU	Asn	A--	None	kalign
+1339	MT457399	GAC	Asp	-AC	None	kalign
+2002	MT066156	GCA	Ala	GUA	Val	clustal,kalign,muscle
+2213	MT470100	GAA	Glu	GAG	Glu	clustal,kalign,muscle
+2241	MT459899	CCC	Pro	UCC	Ser	clustal,kalign,muscle
+2291	MT470100	CAA	Gin	CAU	His	clustal,kalign,muscle
+2323	MT459841	GAA	Glu	GGA	Gly	clustal,kalign,muscle
+2984	MT457400	GAG	Glu	GAU	Asp	clustal,kalign,muscle
+3251	MT358638	CAA	Gin	CAU	His	clustal,kalign,muscle
+4679	MT291826	CUU	Leu	CUC	Leu	clustal,kalign,muscle
+4700	MT457392	ACU	Thr	ACG	Thr	clustal,kalign,muscle
+6179	MT270113,MT270108,MT270104	GAC	Asp	GAA	Glu	clustal,kalign,muscle
+7067	MT470104	GUA	Val	GUU	Val	clustal,kalign,muscle
+7212	MT470104	AAU	Asn	GAU	Asp	clustal,kalign,muscle
+8515	MT292577,LR757995,MT291826	AGC	Ser	AUC	Ile	clustal,kalign,muscle
+9210	MT292577	UUU	Phe	AUU	Ile	clustal,kalign,muscle
+9889	MT292577	GAC	Asp	GUC	Val	clustal,kalign,muscle
+10562	MT457399	GGA	Gly	GGG	Gly	clustal,kalign,muscle
+12528	MT457399	GGA	Gly	AGA	Arg	clustal,kalign,muscle
+12738	MT457399	GCU	Ala	UCU	Ser	clustal,kalign,muscle
+14141	MT457392,MT459836,MT459842,MT459841,MT457400,MT459898	CAC	His	CAU	His	clustal,kalign,muscle
+14538	MT292577,MT470100,MT470104,MT459899	ACU	Thr	UCU	Ser	clustal,kalign,muscle
+16980	MT470104,MT459899	GUG	Val	CUG	Leu	clustal,kalign,muscle
+17143	MT457399	UAC	Tyr	UUC	Ser	clustal,kalign,muscle
+17156	MT358638	ACU	Thr	ACG	Thr	clustal,kalign,muscle
+17997	MT459841	CCC	Pro	UCC	Ser	clustal,kalign,muscle
+
+##Gene=ORF3a,Start=25393,End=26220
+#START-REL	SEQS	CODON-REF	PROT-REF	CODON-DIF	PROT-DIF	TOOLS
+178	MT470104	UCC	Ser	UUC	Ser	clustal,kalign,muscle
+542	MT457400	GAA	Glu	GAU	Asp	clustal,kalign,muscle
+585	MT292577	GGA	Gly	UGA	stop	clustal,kalign,muscle
+653	MT457392	CAA	Gin	CAG	Gin	clustal,kalign,muscle
+750	MT470100,MT066156,MT470104,MT077125,MT459899	GGU	Gly	UGU	Cys	clustal,kalign,muscle
+778	MT459899	AUG	Met	AAG	Lys	clustal,kalign,muscle
+
+##Gene=E,Start=26245,End=26472
+
+##Gene=M,Start=26523,End=27191
+
+##Gene=ORF6,Start=27202,End=27387
+#START-REL	SEQS	CODON-REF	PROT-REF	CODON-DIF	PROT-DIF	TOOLS
+69	MT358638	GUU	Val	CUU	Leu	clustal,kalign,muscle
+
+##Gene=ORF7a,Start=27394,End=27759
+
+##Gene=ORF7b,Start=27756,End=27887
+
+##Gene=ORF8,Start=27894,End=28259
+#START-REL	SEQS	CODON-REF	PROT-REF	CODON-DIF	PROT-DIF	TOOLS
+249	MT292577,LR757995,MT291826	UUA	Leu	CUA	Leu	clustal,kalign,muscle
+
+##Gene=N,Start=28274,End=29533
+#START-REL	SEQS	CODON-REF	PROT-REF	CODON-DIF	PROT-DIF	TOOLS
+382	MT292577,MT459836	GAC	Asp	GUC	Val	clustal,kalign,muscle
+606	MT459841,MT459836,MT459842,MT459898	AGG	Arg	AAC	Asn	clustal,kalign,muscle
+
+##Gene=ORF10,Start=29558,End=29674
+

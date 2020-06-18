@@ -26,7 +26,7 @@ def findDifferencesbyGene(compactDifferences, genes):
         :param genes:
             A dict of genes {gene_id1 : [start_pos, end_pos]}
         :returns:
-            A dict of differences by gene {'gene_id1 : {'align_id1' : [differences]}}
+            A dict of differences by gene {'gene_id1 : [differences]}
     """
     differences_by_gene = dict()
 
@@ -154,10 +154,12 @@ def findDifferencesRelativePos(diff_by_gene, genes):
 
 
 def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes):
+    
+    # Check if ref is %3
 
-    result = dict()
-    for gene_id in genes.keys():
-        result[gene_id] = list()
+    #result = dict()
+    #for gene_id in genes.keys():
+    #    result[gene_id] = list()
 
     codons = dict()
     for gene_id in genes.keys():

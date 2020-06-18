@@ -243,16 +243,23 @@ def main():
     #reference = parseFasta("../Reference/reference")
     #reference = reference["NC_045512"]
 
+    # Replace T->U in reference
     ref_trs = transcribeSequence(reference["NC_045512"]) # trs = transcribed
-    seqs_by_cds = splitSequenceByCds(ref_trs, genes_NC_045512)
 
-    
+    # Obtain CDSs as substrings of reference
+    ref_by_cds = splitSequenceByCds(ref_trs, genes_NC_045512)
+
+    # Split the differences by gene position
     diff_by_gene = findDifferencesbyGene2(result, genes_NC_045512)
+
+    # Replace start with start relative (according to genes/cds)
     diff_by_gene_relative = findDifferencesRelativePos(diff_by_gene, genes_NC_045512)
 
-    cds_differences = findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes_NC_045512)
+    # Detect differences in CDS
+    cds_differences = findTranscriptDifferences(ref_by_cds, diff_by_gene_relative, genes_NC_045512)
 
-    writeCdsDifferencesToFile(path_output+'finalResult',cds_differences,genes_NC_045512)
+    # Write to file differences 
+    writeCdsDifferencesToFile(path_output+'CDS_differences',cds_differences,genes_NC_045512)
     
 
 if __name__ == "__main__":

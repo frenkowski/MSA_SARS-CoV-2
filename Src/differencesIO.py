@@ -205,8 +205,8 @@ def writeCdsDifferencesToFile(fileName, cds_differences, genes):
     """
 
     header = "##Gene={},Start={},End={}\n"
-    fields = "#START-REL\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\tTRANSLATABLE\n"
-    value = "{}\t{}\t{}\t{}\t{}\t{}\n"
+    fields = "#START-REL\tSEQS\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\tTOOLS\n"
+    value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\n"
     path = "{}.mad4".format(fileName)  # MAD4 = Multiple Alignment Difference 4
     with open(path, "w") as f:
         for gene_id in cds_differences.keys():
@@ -220,13 +220,16 @@ def writeCdsDifferencesToFile(fileName, cds_differences, genes):
                 f.write(fields)
             for diff in cds_differences[gene_id]:
                 for cod_diff in diff['cod-info']:
+                    where_to_string = str(diff['where']).strip('{}').replace('\'','').replace(' ','')
+                    aligns_to_string = str(diff['aligns']).strip('{}').replace('\'','').replace(' ','')
                     temp = value.format(
                         diff['start_rel'],
+                        where_to_string,
                         cod_diff['ref-cod'],
                         cod_diff['ref-aa'],
                         cod_diff['dif-cod'],
                         cod_diff['dif-aa'],
-                        "Yes" if diff['still-translatable'] else "No"
+                        aligns_to_string
                     )
                     f.write(temp)
 
