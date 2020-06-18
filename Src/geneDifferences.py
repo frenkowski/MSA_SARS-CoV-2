@@ -254,10 +254,10 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes, all_seq
                     cod_diff = {}
                 i = i + len(dif) - dif.count('-') # Do not consider indels
 
-            if i%3 == 0:
-                diff['still-translatable'] = True
-            else:
-                diff['still-translatable'] = False
+            #if i%3 == 0:
+            #    diff['still-translatable'] = True
+            #else:
+            #    diff['still-translatable'] = False
 
 
     ### STEP 4 : Obtain, for each sequence and for each CDS, all the new codons
@@ -266,13 +266,15 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes, all_seq
         # Contains, for each sequence, all its CDSs
         new_cds_by_seq[seq_id] = dict()
         for gene_id in genes.keys():
-            # Contains a list of codons
-            new_cds_by_seq[seq_id][gene_id] = list()
+            # Contains a dict: {'still-translatable': True/False, 'codons': list of codons}
+            new_cds_by_seq[seq_id][gene_id] = dict()
+            new_cds_by_seq[seq_id][gene_id]['codons'] = list()
+            new_cds_by_seq[seq_id][gene_id]['still-translatable'] = False
 
     # Initialize all codons with the same values as ref
     for seq_id in new_cds_by_seq.keys():
         for gene_id in diff_by_gene_relative.keys():
-            new_cds_by_seq[seq_id][gene_id] = codons[gene_id]
+            new_cds_by_seq[seq_id][gene_id]['codons'] = codons[gene_id]
 
     # Replace codons involved in differences
     for gene_id in diff_by_gene_relative.keys():
@@ -280,7 +282,20 @@ def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes, all_seq
             for seq_id in diff['where']:
                 for i in range(0, len(codons)):
                     if codons[gene_id][i] != diff['codons'][i]:
-                        new_cds_by_seq[seq_id][gene_id][i] = diff['codons'][i]
+                        new_cds_by_seq[seq_id][gene_id]['codons'][i] = diff['codons'][i]
+
+    # Check if CDS is still translatable
+    for seq_id in new_cds_by_seq.keys():
+        for gene_id in diff_by_gene_relative.keys():
+            count_non_indels = 0
+            
+            for codon in new_cds_by_seq[seq_id][gene_id]['codons']:
+                count_non_indels = count_non_indels + len(codon) - codon.count('-')
+            
+            if count_non_indels%3 == 0:
+                new_cds_by_seq[seq_id][gene_id]['still-translatable'] = True
+            else:
+                new_cds_by_seq[seq_id][gene_id]['still-translatable'] = False
 
     # Remove list of codons, useless after this
     for gene_id in diff_by_gene_relative.keys():
