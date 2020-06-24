@@ -127,9 +127,11 @@ def splitSequenceByCds(sequence, genes):
             # -1 should be necessary since 1-based on FASTA annotation
             # +1 on the right since Python considers the right index as non inclusive
             seqs_by_cds[gene_id] = sequence[gene_start-1:gene_stop-1+1]
+            
+            if gene_id == "ORF1ab": # join(266..13468,13468..21555)
+                seqs_by_cds[gene_id] = sequence[266-1:13468-1+1] + sequence[13468-1:21555-1+1]
 
-            #print(gene_id)
-            #print(len(seqs_by_cds[gene_id])%3==0)
+            assert(len(seqs_by_cds[gene_id]) % 3 == 0)
     
     return seqs_by_cds
 
@@ -141,7 +143,8 @@ def findDifferencesRelativePos(diff_by_gene, genes):
         :param genes:
             A dict of genes {gene_id:[start,end]}
         :returns:
-            A dict of CDSs {gene_id:[TranscribedSubSequence]}
+            A dict of differences {gene_id:[differences]},
+                where for each difference a new 'start_rel' field is added
     """   
     
     for gene_id in diff_by_gene.keys():
@@ -154,12 +157,43 @@ def findDifferencesRelativePos(diff_by_gene, genes):
 
 
 def findTranscriptDifferences(seqs_by_cds, diff_by_gene_relative, genes, all_seqs_id):
-    
-    # Check if ref is %3
+    """
+        Returns differences in terms of codons and, for each sequence, all its modified CDSs
+        :param seqs_by_cds:
+            A dict of the form {gene_id: genome_substring_by_CDS}
+        :param diff_by_gene_relative:
+            A dict of differences with the 'start_rel' field added {gene_id:[differences]}
+        :param genes:
+            A dict of genes {gene_id:[start,end]}
+        :returns:
+            A tuple where:
+                - the first element is a dict of differences {gene_id:[differences]} where information
+                    about the different codons involved in the difference is provided. For each
+                    difference a new subfield 'cod-info' is added, which contains information about
+                    codons differences and related amino-acids.
 
-    #result = dict()
-    #for gene_id in genes.keys():
-    #    result[gene_id] = list()
+                - the second element is a dict that contains, for each difference and for each CDS, 
+                    all the codons modified by the sequence
+                    {
+                        seq_id_1: 
+                            {
+                                gene_1: 
+                                    {codons=[], translatable=True/False}
+                                gene_2:
+                                    {codons=[], translatable=True/False}
+                                ...
+                            }
+
+                        seq_id_2:
+                            {
+                                ...
+                            }
+
+                        ...
+                    }
+
+    """    
+
 
     codons = dict()
     for gene_id in genes.keys():
