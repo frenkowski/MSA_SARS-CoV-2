@@ -205,7 +205,7 @@ def writeCdsDifferencesToFile(fileName, cds_differences, new_cds_by_seq, genes):
     """
 
     header = "##Gene={},Start={},End={}\n"
-    header_2 = "##STILL_TRANSLATABLE={}\n"
+    header_2 = "##No_longer_translatable={}\n"
     fields = "#START-REL\tSEQS\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\tTRANSLATABLE\tTOOLS\n"
     value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n"
     path = "{}.mad4".format(fileName)  # MAD4 = Multiple Alignment Difference 4
@@ -217,16 +217,18 @@ def writeCdsDifferencesToFile(fileName, cds_differences, new_cds_by_seq, genes):
             f.write(header_val)
 
             # Write still-translatable
-            # Create a list where a given CDS is still translatable
+            # Create a list of sequences where the given CDS is still translatable
             seqs = list()
             for seq_id in new_cds_by_seq.keys():
-                if new_cds_by_seq[seq_id][gene_id]['still-translatable']:
+                if not new_cds_by_seq[seq_id][gene_id]['still-translatable']:
                     seqs.append(seq_id)
-            
-            # Format list to string
-            seqs_to_string = str(seqs).strip('{}').replace('\'','').replace(' ','')
 
-            f.write(header_2.format(seqs_to_string))
+            if not seqs:
+                f.write("##ALL sequences still translatable\n")
+            else:
+                # Format list to string
+                seqs_to_string = str(seqs).strip('[]').replace('\'','').replace(' ','')
+                f.write(header_2.format(seqs_to_string))
 
             
             # Write differences related to gene_id
