@@ -193,7 +193,7 @@ def writeToFileFinal(fileName, reference, differences, stats):
             )
             f.write(temp)
 
-def writeCdsDifferencesToFile(fileName, cds_differences, genes):
+def writeCdsDifferencesToFile(fileName, cds_differences, new_cds_by_seq, genes):
     """
         Print all differences to terminal
         :param fileName:
@@ -205,8 +205,9 @@ def writeCdsDifferencesToFile(fileName, cds_differences, genes):
     """
 
     header = "##Gene={},Start={},End={}\n"
-    fields = "#START-REL\tSEQS\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\tTOOLS\n"
-    value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\n"
+    header_2 = "##STILL_TRANSLATABLE={}\n"
+    fields = "#START-REL\tSEQS\tCODON-REF\tPROT-REF\tCODON-DIF\tPROT-DIF\tTRANSLATABLE\tTOOLS\n"
+    value = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n"
     path = "{}.mad4".format(fileName)  # MAD4 = Multiple Alignment Difference 4
     with open(path, "w") as f:
         for gene_id in cds_differences.keys():
@@ -214,6 +215,19 @@ def writeCdsDifferencesToFile(fileName, cds_differences, genes):
             # Write header
             header_val = header.format(gene_id, genes[gene_id][0], genes[gene_id][1])
             f.write(header_val)
+
+            # Write still-translatable
+            # Create a list where a given CDS is still translatable
+            seqs = list()
+            for seq_id in new_cds_by_seq.keys():
+                if new_cds_by_seq[seq_id][gene_id]['still-translatable']:
+                    seqs.append(seq_id)
+            
+            # Format list to string
+            seqs_to_string = str(seqs).strip('{}').replace('\'','').replace(' ','')
+
+            f.write(header_2.format(seqs_to_string))
+
             
             # Write differences related to gene_id
             if cds_differences[gene_id]:
@@ -222,6 +236,8 @@ def writeCdsDifferencesToFile(fileName, cds_differences, genes):
                 for cod_diff in diff['cod-info']:
                     where_to_string = str(diff['where']).strip('{}').replace('\'','').replace(' ','')
                     aligns_to_string = str(diff['aligns']).strip('{}').replace('\'','').replace(' ','')
+                    is_still_translatable = (len(cod_diff['dif-cod']) - cod_diff['dif-cod'].count('-')) % 3 == 0
+                    
                     temp = value.format(
                         diff['start_rel'],
                         where_to_string,
@@ -229,6 +245,7 @@ def writeCdsDifferencesToFile(fileName, cds_differences, genes):
                         cod_diff['ref-aa'],
                         cod_diff['dif-cod'],
                         cod_diff['dif-aa'],
+                        "Yes" if is_still_translatable else "No",
                         aligns_to_string
                     )
                     f.write(temp)

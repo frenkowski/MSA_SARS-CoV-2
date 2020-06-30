@@ -3,7 +3,7 @@ from differencesIO import parseFasta, parseClustal, writeToFileMSA, writeToFileF
 from findDifferencesPairwise import findStats
 from geneDifferences import findDifferencesbyGene2, transcribeSequence, findDifferencesRelativePos
 from geneDifferences import findTranscriptDifferences, splitSequenceByCds
-from findPhilogeny import createMatrix
+from findPhilogeny import createMatrix, containsForbidden, createTree
 
 def findDifferences(reference, alignments):
     """
@@ -263,11 +263,17 @@ def main():
     #print(new_cds_by_seq['MT459899'])
 
     # Write to file differences 
-    writeCdsDifferencesToFile(path_output+'CDS_differences',cds_differences,genes_NC_045512)
+    writeCdsDifferencesToFile(path_output+'CDS_differences',cds_differences,new_cds_by_seq,genes_NC_045512)
 
 
     #### START OF PART 3 ####
     (sequences_list, matrix) = createMatrix(alignments, diff_by_gene_relative)
+    print("List:",sequences_list)
+    forbidden = containsForbidden(matrix)
+    print("Does it contain forbidden?","Yes" if forbidden else "No")
+
+    if not forbidden:
+        createTree(sequences_list, matrix)
     
 
 if __name__ == "__main__":
