@@ -1,6 +1,29 @@
 import numpy as np 
 
 def createMatrix(alignments, diff_by_gene_relative):
+	'''
+		Returns the features matrix, i.e. a matrix having reads as rows, 
+		and diffs as columns. Matrix[i][j] = 1 if the i-eth read has 
+		the j-eth diff, 0 otherwise. In order to remember to which
+		row each reads corresponds to, a list of sequence_ids is also returned,
+		such that sequences_list[i] corresponds to the i-eth row.
+
+		:param alignments:
+            A dict of the form {align_id_1 : value, align_id_2 : value, etc.}
+
+        :param diff_by_gene_relative:
+        	A dict of differences {gene_id:[differences]} where information
+            about the different codons involved in the difference is provided
+
+        :returns:
+	        A tuple where:
+	                - the first element is the matrix as described above
+	                
+	                - the second element is a list of sequences_id,
+	                  such that the i-eth row in the matrix corresponds to
+	                  the i-eth sequence_id
+	'''
+
 	
 	### FIRST CREATE AN EMPTY MATRIX
 
@@ -45,95 +68,156 @@ def createMatrix(alignments, diff_by_gene_relative):
 
 
 def containsForbidden(original_matrix):
-	n_one = np.array([])
-	aux_matrix = np.zeros(original_matrix.shape)
-	
-	# Transpose the original matrix so that we can work row-by-row
-	# instead of column-by-column
-	tr_matrix = original_matrix.transpose()
+	'''
+		Returns wheter or not a given matrix contains the forbidden matrix
 
-	# print('Matrice originale: ')
-	# print(original_matrix)
-	# print('\n')
-	
-	#Count numbers of 1 in each column
-	for i in tr_matrix:
+		:param original_matrix:
+            A matrix of features 0/1
+
+        :returns:
+	        A boolean whose value is True if original_matrix contains
+	        the forbidden matrix, False otherwise
+	'''
+
+	n_one = np.array([])
+
+	### STEP 1: Sort original_matrix by column, according to the number
+	###		    of 1 in each column 
+
+	transpose_matrix = original_matrix.transpose()
+	#Count number of 1s in each column
+	for original_col in transpose_matrix:
 		cont = 0
-		for j in i:
-			if j == 1:
+		for val in original_col:
+			if val == 1:
 				cont = cont +1	
 		n_one = np.append(n_one,cont)		
 
-	#Sort columns by descending order of 1s 
+	# Sort by descending number of 1s
 	n_one_sort = sorted(n_one, reverse= True)
-	k1 = 0
+
+	# Holds the column number in the sorted matrix
+	pos_new = 0
+	aux_matrix = np.zeros(original_matrix.shape)
+
 	for i in n_one_sort:
-		k = 0
+		
+		# Holds the column number in the original matrix
+		pos_old = 0
+		
+		# Find the column number in the original matrix
 		for j in n_one:
 			if i == j:
-				n_one[k] = -1
-				l = 0
-				while l != len(tr_matrix[0]):
-					aux_matrix[l][k1] = original_matrix[l][k]
-					l = l + 1
-				#print('\n')
-				#aux_matrix[[k1]] = tr_matrix[[k]]
-				k1 = k1 + 1
-			k = k + 1
-	
+				# Column has been found
+				# -1 is a sentinel value
+				n_one[pos_old] = -1
 
-	#Transpose again to obtain the original matrix
-	original_matrix = aux_matrix.transpose()
-	# print('Matrice originale ordinata: ')
-	# print(original_matrix)
-	# print('\n')
+				# Copy the old column in the new one
+				row = 0
+				while row != len(transpose_matrix[0]):
+					aux_matrix[row][pos_new] = original_matrix[row][pos_old]
+					row = row + 1
+
+				# Move to the next column
+				pos_new = pos_new + 1
+			
+			pos_old = pos_old + 1
+
+	print("Sorted matrix\n", aux_matrix)
+
+	### STEP 2: Find, for each 1 in the sorted matrix, the position
+	###		    of the previous 1 in the same row
+
+	#Create auxillary matrix
+	row = 0
 
 	aux_matrix = np.zeros(original_matrix.shape)
 
-	#Create auxillary matrix
-	rows = 0
-	for i in original_matrix:
-		pos = 0
-		cont = -2 #contains the position where the last 1 was found in the current row   
-		for j in i:
-
-			if j == 1:
-				aux_matrix[rows][pos] = cont + 1
-				cont = pos
+	for curr_line in original_matrix:
+		col = 0
+		
+		#contains the last column where 1 was found
+		cont = -1   
+		
+		for val in curr_line:
+			if val == 1:
+				# set to last column with 1
+				aux_matrix[row][col] = cont
+				# store the current column index
+				cont = col + 1
 			else:
-				aux_matrix[rows][pos] = 0	
-			pos = pos + 1
-		rows = rows + 1
-	# print('Matrice ausiliaria')
-	# print(aux_matrix)
+				aux_matrix[row][col] = 0	
+			col = col + 1
+		
+		row = row + 1
+
+	print("Aux matrix\n", aux_matrix)
 
 
-	#Check forbidden matrix 
-	aux_matrix = aux_matrix.transpose()
+	
+	### STEP 3: Check if the forbidden matrix is actually present
+	###         in aux_matrix
 
-	cont = False
-	row = 0
-	for i in aux_matrix:
-		column = 0
-		for j in i:
-			column = column+1
-			if j != 0:
-				for k in i:
-					if k != 0:
-						if j != k:
-							print("Row", column)
-							print("Column", row)
-							#cont = True
-							#break
-		row = row+1
-		#if cont:
-			#break
-							
+	is_prohibited = False
 
-	if cont:
-		return True
-	else:
-		return False
+	# Check column by column
+	for j in range(0, aux_matrix.shape[1]):
+		# For each row
+		for i in range(0, aux_matrix.shape[0]):
+			if aux_matrix[i][j] == 0:
+				continue
+			else:
+				# For all other rows
+				for k in range (0, aux_matrix.shape[0]):
+					if aux_matrix[i][j] != aux_matrix[k][j] and aux_matrix[k][j] != 0:
+						is_prohibited = True
+						break
+
+		if is_prohibited:
+			break
+
+	return is_prohibited
+
 
 def createTree(sequences_list, original_matrix):
-	pass
+	'''
+		Returns the philogenetic tree obtained from a 0/1 matrix
+
+		:param original_matrix:
+			A matrix of features 0/1
+
+		:param sequences_list:
+            a list of sequences_id, such that the i-eth row
+            in the matrix corresponds to the i-eth sequence_id
+
+        :returns:
+	        A dict that represents the tree
+	'''
+
+	tree = list()
+
+	# For each row
+	for i in range(0,len(original_matrix.shape[0])):
+
+		# The first 1 in each row starts from Root
+		starting_node = "Root"
+
+		# For each column
+		for j in range(0,len(original_matrix.shape[1])):
+
+			if original_matrix[i][j] == 1:
+
+
+	return tree
+
+def main():
+	m1 = np.array([
+		[0,1],
+		[1,0],
+		[1,1]
+	])
+
+	print("Is forbidden?",containsForbidden(m1))
+
+if __name__ == "__main__":
+    main()

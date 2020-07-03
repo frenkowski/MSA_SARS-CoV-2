@@ -4,6 +4,7 @@ from findDifferencesPairwise import findStats
 from geneDifferences import findDifferencesbyGene2, transcribeSequence, findDifferencesRelativePos
 from geneDifferences import findTranscriptDifferences, splitSequenceByCds
 from findPhilogeny import createMatrix, containsForbidden, createTree
+from philogeny2 import orderMatrix
 
 def findDifferences(reference, alignments):
     """
@@ -269,11 +270,11 @@ def main():
     #### START OF PART 3 ####
     (sequences_list, matrix) = createMatrix(alignments, diff_by_gene_relative)
     print("List:",sequences_list)
-    forbidden = containsForbidden(matrix)
-    print("Does it contain forbidden?","Yes" if forbidden else "No")
-
-    if not forbidden:
-        createTree(sequences_list, matrix)
+    forbidden = orderMatrix(matrix)
+    #print("Does it contain forbidden?","Yes" if forbidden else "No")
+    print("Does it contain forbidden?",forbidden)
+    #if not forbidden:
+    #    createTree(sequences_list, matrix)
     
 
 if __name__ == "__main__":
