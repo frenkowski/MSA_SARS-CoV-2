@@ -123,7 +123,7 @@ def containsForbidden(original_matrix):
 			
 			pos_old = pos_old + 1
 
-	print("Sorted matrix\n", aux_matrix)
+	#print("Sorted matrix\n", aux_matrix)
 
 	### STEP 2: Find, for each 1 in the sorted matrix, the position
 	###		    of the previous 1 in the same row
@@ -151,7 +151,7 @@ def containsForbidden(original_matrix):
 		
 		row = row + 1
 
-	print("Aux matrix\n", aux_matrix)
+	#print("Aux matrix\n", aux_matrix)
 
 
 	
@@ -194,30 +194,79 @@ def createTree(sequences_list, original_matrix):
 	        A dict that represents the tree
 	'''
 
-	tree = list()
+	# Initialize root
+	root = dict()
+	root['id'] = "Root"
+	root['reads'] = list() # Should always be empty?
+	root['edges'] = list()
+
+	### STEP 1: Create tree
 
 	# For each row
-	for i in range(0,len(original_matrix.shape[0])):
+	for i in range(0,original_matrix.shape[0]):
 
 		# The first 1 in each row starts from Root
-		starting_node = "Root"
+		curr_node = root
 
 		# For each column
-		for j in range(0,len(original_matrix.shape[1])):
+		for j in range(0,original_matrix.shape[1]):
+			# Initialize dict for current column
+			node_to_add = dict()
 
 			if original_matrix[i][j] == 1:
+				
+				# Create node
+				node_to_add['id'] = "C" + str(j+1)
+				node_to_add['reads'] = []
+				node_to_add['reads'].append(sequences_list[i])
+				node_to_add['edges'] = []
 
+				# Remove read from curr_node
+				# it will "move down" the tree
+				if sequences_list[i] in curr_node['reads']:
+						curr_node['reads'].remove(sequences_list[i])
 
-	return tree
+				found = False
+				# Check if edge already exists
+				for adj_node in curr_node['edges']:
+					if node_to_add['id'] == adj_node['id']:
+						found = True
+						# just add the read to the node
+						adj_node['reads'].append(sequences_list[i])
+						# restart from said node
+						curr_node = adj_node
+						break
+
+				# Create new node
+				if not found:
+					# add an edge to new node
+					curr_node['edges'].append(node_to_add)	
+					# restart from said node	
+					curr_node = node_to_add
+				
+				
+
+	### STEP 2: Convert to list of nodes (start,end)
+	#print("Root is",root)
+	return root
 
 def main():
-	m1 = np.array([
-		[0,1],
+	# m1 = np.array([
+	# 	[0,1],
+	# 	[1,0],
+	# 	[1,1]
+	# ])
+
+	# print("Is forbidden?",containsForbidden(m1))
+
+	m2 = np.array([
+		[1,1],
 		[1,0],
 		[1,1]
 	])
 
-	print("Is forbidden?",containsForbidden(m1))
+	print("Is forbidden?",containsForbidden(m2))
+	print("Tree:",createTree(["read0","read1","read2"],m2))
 
 if __name__ == "__main__":
     main()
