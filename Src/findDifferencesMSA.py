@@ -3,8 +3,8 @@ from differencesIO import parseFasta, parseClustal, writeToFileMSA, writeToFileF
 from findDifferencesPairwise import findStats
 from geneDifferences import findDifferencesbyGene2, transcribeSequence, findDifferencesRelativePos
 from geneDifferences import findTranscriptDifferences, splitSequenceByCds
-from findPhilogeny import createMatrix, containsForbidden, createTree
-from philogeny2 import orderMatrix
+from findPhilogeny import createMatrix, containsForbidden, createTree, printTree
+import numpy as np
 
 def findDifferences(reference, alignments):
     """
@@ -269,13 +269,35 @@ def main():
 
     #### START OF PART 3 ####
     (sequences_list, matrix) = createMatrix(alignments, diff_by_gene_relative)
-    print("List:",sequences_list)
-    forbidden = orderMatrix(matrix)
-    #print("Does it contain forbidden?","Yes" if forbidden else "No")
-    print("Does it contain forbidden?",forbidden)
-    #if not forbidden:
-    #    createTree(sequences_list, matrix)
+
+    # Check if resulting matrix contains forbidden
+
+    matrix1 = matrix[0:,0:10].astype(int)   # 10 gives forbidden matrix
+    matrix2 = matrix[0:,11:19].astype(int)  # 19 gives forbidden matrix
+    matrix3 = matrix[0:,20:24].astype(int)  # 24 gives forbidden matrix
+    matrix4 = matrix[0:,25:30].astype(int)  # 30,31 give forbidden matrix
+    matrix5 = matrix[0:,33:35].astype(int)  # 35 gives forbidden matrix
+    matrix6 = matrix[0:,36:46].astype(int)  # 46 gives forbidden matrix
+    matrix7 = matrix[0:,47:49].astype(int)  # 49,50 gives forbidden
+    matrix8 = matrix[0:,51:53].astype(int)  # 53 gives forbidden
+    matrix9 = matrix[0:,54:].astype(int)
     
+    matrix = np.concatenate((matrix1, matrix2),axis=1) #axis=1 means concat columns
+    matrix = np.concatenate((matrix, matrix3),axis=1)
+    matrix = np.concatenate((matrix, matrix4),axis=1)
+    matrix = np.concatenate((matrix, matrix5),axis=1)
+    matrix = np.concatenate((matrix, matrix6),axis=1)
+    matrix = np.concatenate((matrix, matrix7),axis=1)
+    matrix = np.concatenate((matrix, matrix8),axis=1)
+    matrix = np.concatenate((matrix, matrix9),axis=1)
+
+    #print("Matrix is: ",matrix)
+
+    forbidden = containsForbidden(matrix)
+    print("Does it contain forbidden?",forbidden)
+    if not forbidden:
+        nodes = createTree(sequences_list,matrix)
+        printTree(nodes)
 
 if __name__ == "__main__":
     main()
