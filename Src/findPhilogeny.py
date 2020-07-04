@@ -192,13 +192,13 @@ def createTree(sequences_list, original_matrix):
             in the matrix corresponds to the i-eth sequence_id
 
         :returns:
-	        A dict that represents the tree
+	        A list of edges (Node1, Node2)
 	'''
 
 	# Initialize root
 	root = dict()
 	root['id'] = "Root"
-	root['reads'] = list() # Should always be empty?
+	root['reads'] = list() # Should always be empty
 	root['edges'] = list()
 
 	### STEP 1: Create tree
@@ -247,7 +247,7 @@ def createTree(sequences_list, original_matrix):
 				
 				
 
-	### STEP 2: Convert to list of nodes (start,end)
+	### STEP 2: Convert to list of edges (start,end)
 
 	result = visit(root)
 
@@ -279,11 +279,11 @@ def visit(tree):
 
 	return result
 
-def printTree(nodes_list):
+def printTree(edges_list):
 	# create root
 	root = Node("Root")
 
-	for (node1, node2) in nodes_list:
+	for (node1, node2) in edges_list:
 		Node(node2, parent=find_by_attr(root, node1))
 	for pre, _, node in RenderTree(root):
 		print("%s%s" % (pre, node.name))
