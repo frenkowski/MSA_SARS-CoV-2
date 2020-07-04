@@ -247,8 +247,36 @@ def createTree(sequences_list, original_matrix):
 				
 
 	### STEP 2: Convert to list of nodes (start,end)
+
+	result = visit(root)
+
 	#print("Root is",root)
-	return root
+	return result
+
+def visit(tree):
+	'''
+		Performs a visit on the resulting tree, in order to obtain
+		a list of pairs (starting_node, ending_node) to feed in
+		to the tree visualization algorithm.
+
+		:param tree:
+            a tree where nodes are represented as dicts, and each has a 
+            list edges, where the adjacent nodes are present
+
+        :returns:
+	        A list of pairs (starting_node, ending_node)
+
+	'''
+	result = []
+
+	for read in tree['reads']:
+		result.append((tree['id'],read))
+
+	for adj_node in tree['edges']:
+		result.append((tree['id'],adj_node['id']))
+		result.extend(visit(adj_node))
+
+	return result
 
 def main():
 	# m1 = np.array([
