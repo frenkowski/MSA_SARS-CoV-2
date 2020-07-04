@@ -1,4 +1,5 @@
 import numpy as np 
+from anytree import Node, RenderTree, find_by_attr
 
 def createMatrix(alignments, diff_by_gene_relative):
 	'''
@@ -278,6 +279,16 @@ def visit(tree):
 
 	return result
 
+def printTree(nodes_list):
+	# create root
+	root = Node("Root")
+
+	for (node1, node2) in nodes_list:
+		Node(node2, parent=find_by_attr(root, node1))
+	for pre, _, node in RenderTree(root):
+		print("%s%s" % (pre, node.name))
+
+
 def main():
 	# m1 = np.array([
 	# 	[0,1],
@@ -294,7 +305,9 @@ def main():
 	])
 
 	print("Is forbidden?",containsForbidden(m2))
-	print("Tree:",createTree(["read0","read1","read2"],m2))
+	#print("Tree:",createTree(["read0","read1","read2"],m2))
+	nodes = createTree(["read0","read1","read2"],m2)
+	printTree(nodes)
 
 if __name__ == "__main__":
     main()
