@@ -1,5 +1,6 @@
 import numpy as np 
 from anytree import Node, RenderTree, find_by_attr
+from anytree.dotexport import RenderTreeGraph
 
 def createMatrix(alignments, diff_by_gene_relative):
 	'''
@@ -79,6 +80,9 @@ def containsForbidden(original_matrix):
 	        A boolean whose value is True if original_matrix contains
 	        the forbidden matrix, False otherwise
 	'''
+
+	# if original_matrix is None:
+	# 	return False
 
 	n_one = np.array([])
 
@@ -279,6 +283,19 @@ def visit(tree):
 
 	return result
 
+def findBiggestNotForbidden(matrix):
+	new_matrix = matrix[:,0:1].astype(int)
+
+	for i in range(1,matrix.shape[1]):
+		curr_column = matrix[:,i:i+1].astype(int)
+		
+		new_matrix = np.concatenate((new_matrix, curr_column),axis=1)
+
+		if containsForbidden(new_matrix):
+			new_matrix = new_matrix[:,:-1]
+			
+	return new_matrix
+
 def printTree(edges_list):
 	# create root
 	root = Node("Root")
@@ -287,6 +304,9 @@ def printTree(edges_list):
 		Node(node2, parent=find_by_attr(root, node1))
 	for pre, _, node in RenderTree(root):
 		print("%s%s" % (pre, node.name))
+
+	# Print to file --- GRAPVIZ MUST BE INSTALLED!!!
+	#RenderTreeGraph(root).to_picture("./tree.png")
 
 
 def main():
