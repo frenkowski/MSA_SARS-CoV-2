@@ -3,7 +3,7 @@ from differencesIO import parseFasta, parseClustal, writeToFileMSA, writeToFileF
 from findDifferencesPairwise import findStats
 from geneDifferences import findDifferencesbyGene2, transcribeSequence, findDifferencesRelativePos
 from geneDifferences import findTranscriptDifferences, splitSequenceByCds
-from findPhilogeny import createMatrix, containsForbidden, createTree, printTree, findBiggestNotForbidden
+from findPhylogeny import createMatrix, containsForbidden, createTree, printTree, findBiggestNotForbidden
 import numpy as np
 
 def findDifferences(reference, alignments):
@@ -270,7 +270,7 @@ def main():
     #### START OF PART 3 ####
 
     # Create matrix from codon differences
-    (sequences_list, matrix) = createMatrix(alignments, diff_by_gene_relative)
+    (sequences_list, matrix) = createMatrix(reference, alignments, diff_by_gene_relative)
     print("A matrix of size {} was found".format(matrix.shape))
 
     # Find biggest possible matrix not containing forbidden

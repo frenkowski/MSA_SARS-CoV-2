@@ -1,8 +1,9 @@
 import numpy as np 
 from anytree import Node, RenderTree, find_by_attr
 from anytree.dotexport import RenderTreeGraph
+from anytree.exporter import DotExporter
 
-def createMatrix(alignments, diff_by_gene_relative):
+def createMatrix(reference, alignments, diff_by_gene_relative):
 	'''
 		Returns the features matrix, i.e. a matrix having reads as rows, 
 		and diffs as columns. Matrix[i][j] = 1 if the i-eth read has 
@@ -39,7 +40,8 @@ def createMatrix(alignments, diff_by_gene_relative):
 	sequences_no = len(alignments.keys())
 
 	# Create matrix having as rows the sequences, and as columns the differences
-	matrix = np.zeros((sequences_no,differences_no))
+	# + 1 since reference also needs to be considered
+	matrix = np.zeros((sequences_no+1,differences_no))
 	# print("Sequences_no", sequences_no)
 	# print("Differences_no",differences_no)
 
@@ -48,6 +50,8 @@ def createMatrix(alignments, diff_by_gene_relative):
 
 	# Convert sequences to list
 	sequences_list = list(alignments.keys())
+	# Add reference to keys
+	sequences_list.append(list(reference.keys())[0])
 
 	# For each diff
 	column = 0
@@ -64,7 +68,7 @@ def createMatrix(alignments, diff_by_gene_relative):
 
 	# print("Matrix",matrix.astype(int))
 	# print("Shape",matrix.shape)
-	np.savetxt('test.out', matrix, fmt="%d", delimiter=',')
+	np.savetxt('../Outputs/matrix.out', matrix, fmt="%d", delimiter=',')
 
 	return (sequences_list, matrix)
 
@@ -202,7 +206,8 @@ def createTree(sequences_list, original_matrix):
 	# Initialize root
 	root = dict()
 	root['id'] = "Root"
-	root['reads'] = list() # Should always be empty
+	#root['reads'] = list() # Should always be empty
+	root['reads'] = sequences_list.copy() # All sequences start in node 0
 	root['edges'] = list()
 
 	### STEP 1: Create tree
@@ -228,8 +233,7 @@ def createTree(sequences_list, original_matrix):
 
 				# Remove read from curr_node
 				# it will "move down" the tree
-				if sequences_list[i] in curr_node['reads']:
-						curr_node['reads'].remove(sequences_list[i])
+				curr_node['reads'].remove(sequences_list[i])
 
 				found = False
 				# Check if edge already exists
@@ -306,7 +310,22 @@ def printTree(edges_list):
 		print("%s%s" % (pre, node.name))
 
 	# Print to file --- GRAPVIZ MUST BE INSTALLED!!!
-	#RenderTreeGraph(root).to_picture("./tree.png")
+	# RenderTreeGraph(root).to_picture("../Outputs/tree.png")
+
+
+
+# def nodenamefunc(node):
+# 	return '%s:%s' % (node.name, node.depth)
+# def edgeattrfunc(node, child):
+# 	return 'label="%s"' % (node.edge)
+# def edgetypefunc(node, child):
+#     return '--'
+# def printcopy(root):
+#     for line in DotExporter(root, graph="graph",
+# 						nodenamefunc=nodenamefunc,
+# 						edgeattrfunc=edgeattrfunc,
+# 						edgetypefunc=edgetypefunc):
+#     	print(line)
 
 
 def main():
@@ -319,9 +338,9 @@ def main():
 	# print("Is forbidden?",containsForbidden(m1))
 
 	m2 = np.array([
-		[1,1],
+		[0,1],
 		[1,0],
-		[1,1]
+		[0,0],
 	])
 
 	print("Is forbidden?",containsForbidden(m2))
