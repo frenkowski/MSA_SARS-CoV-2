@@ -68,7 +68,7 @@ def createMatrix(reference, alignments, diff_by_gene_relative):
 
 	# print("Matrix",matrix.astype(int))
 	# print("Shape",matrix.shape)
-	np.savetxt('../Outputs/matrix.out', matrix, fmt="%d", delimiter=',')
+	np.savetxt('../Outputs/Part3/matrix.out', matrix, fmt="%d", delimiter=',')
 
 	return (sequences_list, matrix)
 
@@ -310,7 +310,7 @@ def printTree(edges_list):
 		print("%s%s" % (pre, node.name))
 
 	# Print to file --- GRAPVIZ MUST BE INSTALLED!!!
-	# RenderTreeGraph(root).to_picture("../Outputs/tree.png")
+	RenderTreeGraph(root).to_picture("../Outputs/Part3/tree.png")
 
 
 
