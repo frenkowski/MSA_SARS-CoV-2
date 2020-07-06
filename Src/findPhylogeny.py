@@ -2,6 +2,7 @@ import numpy as np
 from anytree import Node, RenderTree, find_by_attr
 from anytree.dotexport import RenderTreeGraph
 from anytree.exporter import DotExporter
+import pip
 
 def createMatrix(reference, alignments, diff_by_gene_relative):
 	'''
@@ -310,7 +311,11 @@ def printTree(edges_list):
 		print("%s%s" % (pre, node.name))
 
 	# Print to file --- GRAPVIZ MUST BE INSTALLED!!!
-	RenderTreeGraph(root).to_picture("../Outputs/Part3/tree.png")
+	installed_packages = ["%s" % i.key for i in pip.get_installed_distributions()]
+	
+	if 'graphviz' in installed_packages:
+		RenderTreeGraph(root).to_picture("../Outputs/Part3/tree.png")
+		print('Tree generated correctly')
 
 
 

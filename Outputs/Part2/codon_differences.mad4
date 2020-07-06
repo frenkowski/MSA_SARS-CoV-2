@@ -15,17 +15,17 @@
 3251	MT358638	CAA	Gin	CAU	His	Yes	muscle,clustal,kalign
 4679	MT291826	CUU	Leu	CUC	Leu	Yes	muscle,clustal,kalign
 4700	MT457392	ACU	Thr	ACG	Thr	Yes	muscle,clustal,kalign
-6179	MT270108,MT270104,MT270113	GAC	Asp	GAA	Glu	Yes	muscle,clustal,kalign
+6179	MT270104,MT270113,MT270108	GAC	Asp	GAA	Glu	Yes	muscle,clustal,kalign
 7067	MT470104	GUA	Val	GUU	Val	Yes	muscle,clustal,kalign
 7212	MT470104	AAU	Asn	GAU	Asp	Yes	muscle,clustal,kalign
-8515	LR757995,MT291826,MT292577	AGC	Ser	AUC	Ile	Yes	muscle,clustal,kalign
+8515	MT291826,MT292577,LR757995	AGC	Ser	AUC	Ile	Yes	muscle,clustal,kalign
 9210	MT292577	UUU	Phe	AUU	Ile	Yes	muscle,clustal,kalign
 9889	MT292577	GAC	Asp	GUC	Val	Yes	muscle,clustal,kalign
 10562	MT457399	GGA	Gly	GGG	Gly	Yes	muscle,clustal,kalign
 12528	MT457399	GGA	Gly	AGA	Arg	Yes	muscle,clustal,kalign
 12738	MT457399	GCU	Ala	UCU	Ser	Yes	muscle,clustal,kalign
 14007	MT457392,MT457400	GAG	Glu	AAG	Lys	Yes	muscle,clustal,kalign
-14141	MT457392,MT459842,MT459841,MT459898,MT459836,MT457400	CCA	Pro	CCU	Pro	Yes	muscle,clustal,kalign
+14141	MT459841,MT459842,MT457400,MT459898,MT459836,MT457392	CCA	Pro	CCU	Pro	Yes	muscle,clustal,kalign
 15652	MT459899	UAU	Tyr	UUU	Phe	Yes	muscle,clustal,kalign
 17156	MT358638	CAC	His	CAG	Gin	Yes	muscle,clustal,kalign
 17997	MT459841	ACC	Thr	UCC	Ser	Yes	muscle,clustal,kalign
@@ -37,7 +37,7 @@
 542	MT457400	GAA	Glu	GAU	Asp	Yes	muscle,clustal,kalign
 585	MT292577	GGA	Gly	UGA	stop	Yes	muscle,clustal,kalign
 653	MT457392	CAA	Gin	CAG	Gin	Yes	muscle,clustal,kalign
-750	MT066156,MT077125,MT470100,MT470104,MT459899	GGU	Gly	UGU	Cys	Yes	muscle,clustal,kalign
+750	MT470104,MT077125,MT066156,MT470100,MT459899	GGU	Gly	UGU	Cys	Yes	muscle,clustal,kalign
 778	MT459899	AUG	Met	AAG	Lys	Yes	muscle,clustal,kalign
 
 ##Gene=E,Start=26245,End=26472
@@ -60,13 +60,13 @@
 ##Gene=ORF8,Start=27894,End=28259
 ##ALL sequences still translatable
 #START-REL	SEQS	CODON-REF	PROT-REF	CODON-DIF	PROT-DIF	TRANSLATABLE	TOOLS
-249	LR757995,MT291826,MT292577	UUA	Leu	CUA	Leu	Yes	muscle,clustal,kalign
+249	MT291826,MT292577,LR757995	UUA	Leu	CUA	Leu	Yes	muscle,clustal,kalign
 
 ##Gene=N,Start=28274,End=29533
 ##ALL sequences still translatable
 #START-REL	SEQS	CODON-REF	PROT-REF	CODON-DIF	PROT-DIF	TRANSLATABLE	TOOLS
-382	MT459836,MT292577	GAC	Asp	GUC	Val	Yes	muscle,clustal,kalign
-606	MT459898,MT459836,MT459842,MT459841	AGG	Arg	AAC	Asn	Yes	muscle,clustal,kalign
+382	MT292577,MT459836	GAC	Asp	GUC	Val	Yes	muscle,clustal,kalign
+606	MT459898,MT459841,MT459836,MT459842	AGG	Arg	AAC	Asn	Yes	muscle,clustal,kalign
 
 ##Gene=ORF10,Start=29558,End=29674
 ##ALL sequences still translatable
